@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::{complex::quaternion::Quaternion, linear::vector::Vector3};
 
 mod linear;

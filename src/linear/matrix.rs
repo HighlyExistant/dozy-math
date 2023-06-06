@@ -47,7 +47,7 @@ impl<T> Matrix2<T>  {
 /// floating point.
 /// 
 impl<T: Number> Matrix2<T>  {
-    fn identity(val: T) -> Self {
+    pub fn identity(val: T) -> Self {
         Self { x: Vector2 { x: val, y: T::zero() }, y: Vector2 { x: T::zero(), y: val } }
     }
 }
@@ -104,7 +104,7 @@ impl<T> Matrix3<T>  {
 /// floating point.
 /// 
 impl<T: Number> Matrix3<T>  {
-    fn identity(val: T) -> Self {
+    pub fn identity(val: T) -> Self {
         Self { x: Vector3 { x: val, y: T::zero(), z: T::zero() }, y: Vector3 { x: T::zero(), y: val, z: T::zero() }, z: Vector3 { x: T::zero(), y: T::zero(), z: val } }
     }
 }
@@ -169,7 +169,7 @@ impl<T> Matrix4<T>  {
 /// floating point.
 /// 
 impl<T: Number> Matrix4<T>  {
-    fn identity(val: T) -> Self {
+    pub fn identity(val: T) -> Self {
         Self { 
             x: Vector4 { x: val, y: T::zero(), z: T::zero(), w: T::zero() }, 
             y: Vector4 { x: T::zero(), y: val, z: T::zero(), w: T::zero() }, 
