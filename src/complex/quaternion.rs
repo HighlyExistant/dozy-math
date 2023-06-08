@@ -1,3 +1,5 @@
+use std::fmt::{Debug, Display};
+
 use num_traits::Num;
 
 use crate::linear::{vector::Vector3, traits::{Number, FloatingPoint}, self, matrix::Matrix3};
@@ -30,19 +32,29 @@ impl<T> Quaternion<T>  {
 /// floating point.
 /// 
 impl Quaternion<f32>  {
+    /// # from_euler
+    /// 
+    /// converts euler angles into quaternion form.
+    /// 
+    /// this function is heavily inspired by [this stackexcgange post](https://math.stackexchange.com/questions/2975109/how-to-convert-euler-angles-to-quaternions-and-get-the-same-euler-angles-back-fr)
     pub fn from_euler(v: Vector3<f32>) -> Self {
         let x = f32::sin(v.x/2.0) * f32::cos(v.z/2.0) * f32::cos(v.y/2.0) - f32::cos(v.x/2.0) * f32::sin(v.z/2.0) * f32::sin(v.y/2.0);
-        let y = f32::cos(v.x/2.0) * f32::sin(v.z/2.0) * f32::cos(v.y/2.0) + f32::sin(v.x/2.0) * f32::cos(v.z/2.0) * f32::sin(v.y/2.0);
-        let z = f32::cos(v.x/2.0) * f32::cos(v.z/2.0) * f32::sin(v.y/2.0) - f32::sin(v.x/2.0) * f32::sin(v.z/2.0) * f32::cos(v.y/2.0);
+        let y = f32::cos(v.x/2.0) * f32::cos(v.z/2.0) * f32::sin(v.y/2.0) - f32::sin(v.x/2.0) * f32::sin(v.z/2.0) * f32::cos(v.y/2.0);
+        let z = f32::cos(v.x/2.0) * f32::sin(v.z/2.0) * f32::cos(v.y/2.0) + f32::sin(v.x/2.0) * f32::cos(v.z/2.0) * f32::sin(v.y/2.0);
         let w = f32::cos(v.x/2.0) * f32::cos(v.z/2.0) * f32::cos(v.y/2.0) + f32::sin(v.x/2.0) * f32::sin(v.z/2.0) * f32::sin(v.y/2.0);
         Self { vector: Vector3 { x, y, z }, scalar: w }
     }
 }
 impl Quaternion<f64>  {
+    /// # from_euler
+    /// 
+    /// converts euler angles into quaternion form.
+    /// 
+    /// this function is heavily inspired by [this stackexcgange post](https://math.stackexchange.com/questions/2975109/how-to-convert-euler-angles-to-quaternions-and-get-the-same-euler-angles-back-fr)
     pub fn from_euler(v: Vector3<f64>) -> Self {
         let x = f64::sin(v.x/2.0) * f64::cos(v.z/2.0) * f64::cos(v.y/2.0) - f64::cos(v.x/2.0) * f64::sin(v.z/2.0) * f64::sin(v.y/2.0);
-        let y = f64::cos(v.x/2.0) * f64::sin(v.z/2.0) * f64::cos(v.y/2.0) + f64::sin(v.x/2.0) * f64::cos(v.z/2.0) * f64::sin(v.y/2.0);
-        let z = f64::cos(v.x/2.0) * f64::cos(v.z/2.0) * f64::sin(v.y/2.0) - f64::sin(v.x/2.0) * f64::sin(v.z/2.0) * f64::cos(v.y/2.0);
+        let y = f64::cos(v.x/2.0) * f64::cos(v.z/2.0) * f64::sin(v.y/2.0) - f64::sin(v.x/2.0) * f64::sin(v.z/2.0) * f64::cos(v.y/2.0);
+        let z = f64::cos(v.x/2.0) * f64::sin(v.z/2.0) * f64::cos(v.y/2.0) + f64::sin(v.x/2.0) * f64::cos(v.z/2.0) * f64::sin(v.y/2.0);
         let w = f64::cos(v.x/2.0) * f64::cos(v.z/2.0) * f64::cos(v.y/2.0) + f64::sin(v.x/2.0) * f64::sin(v.z/2.0) * f64::sin(v.y/2.0);
         Self { vector: Vector3 { x, y, z }, scalar: w }
     }
@@ -89,9 +101,27 @@ impl<T: Number> From<Quaternion<T>> for Matrix3<T> {
 
 impl<T: Number> std::ops::Mul<Vector3<T>> for Quaternion<T> {
     fn mul(self, rhs: Vector3<T>) -> Self::Output {
-        let mat3 = linear::matrix::Matrix3::<T>::from(self);
+        let x2 = self.vector.x + self.vector.x;
+        let y2 = self.vector.y + self.vector.y;
+        let z2 = self.vector.z + self.vector.z;
+        
+        let xx2 = x2 * self.vector.x;
+        let xy2 = x2 * self.vector.y;
+        let xz2 = x2 * self.vector.z;
 
-        rhs * mat3
+        let yy2 = y2 * self.vector.y;
+        let yz2 = y2 * self.vector.z;
+        let zz2 = z2 * self.vector.z;
+
+        let sy2 = y2 * self.scalar;
+        let sz2 = z2 * self.scalar;
+        let sx2 = x2 * self.scalar;
+
+        Vector3 {
+            x: (T::one() - (yy2 + zz2)) * rhs.x + (xy2 - sz2) * rhs.y + (xz2 + sy2) * rhs.z,
+            y: (xy2 + sz2) * rhs.x + (T::one() - (xx2 + zz2)) * rhs.y + (yz2 - sx2) * rhs.z,
+            z: (xz2 - sy2) * rhs.x + (yz2 + sx2) * rhs.y + (T::one() - (xx2 + yy2)) * rhs.z,
+        }
     }
     type Output = Vector3<T>;
 }

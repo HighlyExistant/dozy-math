@@ -15,5 +15,11 @@ fn main() {
     // println!("Z 90 degrees: {:#?}", vec3.rotatez(std::f64::consts::PI/2.0));
     // println!("Z 180 degrees: {:#?}", vec3.rotatez(std::f64::consts::PI));
     // println!("Z 360 degrees: {:#?}", vec3.rotatez(std::f64::consts::PI*2.0));
-    print!("{:#?}", ( Quaternion::<f32>::from_euler(FVec3::new(0.0, 0.0, 1.0)) * FVec3::new(0.0, 1.0, 0.0)));
+    let quat = Quaternion::<f32>::from_euler(FVec3::new(0.0, 0.0, std::f32::consts::PI/2.0));
+    // println!("quaternion: {:#?}", quat);
+    
+    let vec3 =  FVec3::new(0.0, 1.0, 0.0);
+    let x = quat * vec3;
+    println!("x {}\ny {}\nz {}", x.x, x.y, x.z);
+    // println!("vector {}", );
 }
