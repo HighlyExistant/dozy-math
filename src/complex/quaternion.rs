@@ -125,3 +125,16 @@ impl<T: Number> std::ops::Mul<Vector3<T>> for Quaternion<T> {
     }
     type Output = Vector3<T>;
 }
+impl<T: Number> std::ops::Mul for Quaternion<T>  {
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self { 
+            vector: Vector3 { 
+                x: self.scalar * rhs.vector.x + self.vector.x * rhs.scalar + self.vector.y * rhs.vector.z - self.vector.z * rhs.vector.y, 
+                y: self.scalar * rhs.vector.y + self.vector.y * rhs.scalar + self.vector.z * rhs.vector.x - self.vector.x * rhs.vector.z, 
+                z: self.scalar * rhs.vector.z + self.vector.z * rhs.scalar + self.vector.x * rhs.vector.y - self.vector.y * rhs.vector.x
+            }, 
+            scalar: self.scalar * rhs.scalar - self.vector.x * rhs.vector.x - self.vector.y * rhs.vector.y - self.vector.z * rhs.vector.z
+        }
+    }
+    type Output = Self;
+}
