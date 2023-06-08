@@ -1,7 +1,7 @@
 #![allow(unused)]
 use num_traits::{Num, AsPrimitive};
 
-use super::traits::{Number, FloatingPoint, UnsignedNumber};
+use super::{traits::{Number, FloatingPoint, UnsignedNumber}, matrix::{Matrix2, Matrix3, Matrix4}};
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Vector2<T> {
@@ -135,7 +135,20 @@ impl<T: Number> std::ops::DivAssign for Vector2<T>  {
         self.y /= rhs.y;
     }
 }
-
+impl<T: Number> std::ops::Mul<Matrix2<T>> for Vector2<T>  {
+    /// # Multiplying Vector2 with Matrix2
+    /// 
+    /// when you multiply a Vector2 with a Matrix2 we treat the vector
+    /// as a 1x2 matrix * 2x2 matrix since it is impossible to multiply
+    /// a 2x2 matrix * 1x2 matrix since matrix multiplication is not commutative.
+    fn mul(self, rhs: Matrix2<T>) -> Self::Output {
+        Vector2::<T> {
+            x: self.x * rhs.x.x + self.y * rhs.y.x,
+            y: self.x * rhs.x.y + self.y * rhs.y.y
+        }
+    }
+    type Output = Vector2<T>;
+}
 ///
 /// These functions are available for all floating point 
 /// numbers.
@@ -276,7 +289,21 @@ impl<T: Number> std::ops::DivAssign for Vector3<T>  {
         self.z /= rhs.z;
     }
 }
-
+impl<T: Number> std::ops::Mul<Matrix3<T>> for Vector3<T>  {
+    /// # Multiplying Vector3 with Matrix3
+    /// 
+    /// when you multiply a Vector3 with a Matrix3 we treat the vector
+    /// as a 1x3 matrix * 3x3 matrix since it is impossible to multiply
+    /// a 3x3 matrix * 1x3 matrix since matrix multiplication is not commutative.
+    fn mul(self, rhs: Matrix3<T>) -> Self::Output {
+        Vector3::<T> {
+            x: self.x * rhs.x.x + self.y * rhs.y.x + self.z * rhs.z.x,
+            y: self.x * rhs.x.y + self.y * rhs.y.y + self.z * rhs.z.y,
+            z: self.x * rhs.x.z + self.y * rhs.y.z + self.z * rhs.z.z
+        }
+    }
+    type Output = Vector3<T>;
+}
 ///
 /// These functions are available for all floating point 
 /// numbers.
@@ -411,6 +438,22 @@ impl<T: Number> std::ops::DivAssign for Vector4<T>  {
         self.z /= rhs.z;
         self.w /= rhs.w;
     }
+}
+impl<T: Number> std::ops::Mul<Matrix4<T>> for Vector4<T>  {
+    /// # Multiplying Vector4 with Matrix4
+    /// 
+    /// when you multiply a Vector4 with a Matrix4 we treat the vector
+    /// as a 1x4 matrix * 4x4 matrix since it is impossible to multiply
+    /// a 4x4 matrix * 1x4 matrix since matrix multiplication is not commutative.
+    fn mul(self, rhs: Matrix4<T>) -> Self::Output {
+        Vector4::<T> {
+            x: self.x * rhs.x.x + self.y * rhs.y.x + self.z * rhs.z.x + self.w * rhs.w.x,
+            y: self.x * rhs.x.y + self.y * rhs.y.y + self.z * rhs.z.y + self.w * rhs.w.y,
+            z: self.x * rhs.x.z + self.y * rhs.y.z + self.z * rhs.z.z + self.w * rhs.w.z,
+            w: self.x * rhs.x.w + self.y * rhs.y.w + self.z * rhs.z.w + self.w * rhs.w.w
+        }
+    }
+    type Output = Vector4<T>;
 }
 
 ///

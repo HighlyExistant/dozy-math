@@ -4,6 +4,8 @@ use self::{traits::{FloatingPoint, Number}, matrix::Matrix4, vector::Vector3};
 pub mod traits;
 pub mod vector;
 pub mod matrix;
+pub mod rotation;
+pub use rotation::*;
 
 // Vector types
 
@@ -86,52 +88,6 @@ pub type UCMat4 = matrix::Matrix4<u8>;
 pub type USMat4 = matrix::Matrix4<u16>;
 pub type UIMat4 = matrix::Matrix4<u32>;
 pub type ULMat4 = matrix::Matrix4<u64>;
-
-/// # rotate
-/// 
-/// perform a rotation on a Floating Point Matrix4 on an axis specified by v.
-/// 
-/// # Example
-/// ```
-/// 
-/// let mut transform = FMat4::identity(1.0);
-/// // Rotating along the y axis
-/// transform = rotate(&transform, self.rotation.y, FVec3::new(0.0, 1.0, 0.0));
-/// // Rotating along the x axis
-/// transform = rotate(&transform, self.rotation.y, FVec3::new(1.0, 0.0, 0.0));
-/// // Rotating along the z axis
-/// transform = rotate(&transform, self.rotation.y, FVec3::new(0.0, 0.0, 1.0));
-/// ```
-/// This function is heavily influenced from the implementation [glm](https://github.com/g-truc/glm) uses.
-/// other resources from [wikipedia](https://en.wikipedia.org/wiki/Rotation_matrix).
-pub fn rotate<T: FloatingPoint + Default>(m: &Matrix4<T>, angle: T, v: Vector3<T>) -> Matrix4<T> {
-    let a = angle;
-    let c = a.cos();
-    let s = a.sin();
-
-    let axis = v.normalize();
-    let temp: Vector3<T> = axis * (T::one() - c) ;
-
-    let mut rotate = Matrix4::<T>::default();
-    rotate.x.x = c + temp.x * axis.x;
-    rotate.x.y = temp.x * axis.y + s * axis.z;
-    rotate.x.z = temp.x * axis.z - s * axis.y;
-
-    rotate.y.x = temp.y * axis.x - s * axis.z;
-    rotate.y.y = c + temp.y * axis.y;
-    rotate.y.z = temp.y * axis.z + s * axis.x;
-
-    rotate.z.x = temp.z * axis.x + s * axis.y;
-    rotate.z.y = temp.z * axis.y - s * axis.x;
-    rotate.z.z = c + temp.z * axis.z;
-
-    let mut result = Matrix4::<T>::default();
-    result.x = m.x * rotate.x.x + m.y * rotate.x.y + m.z * rotate.x.z;
-    result.y = m.x * rotate.y.x + m.y * rotate.y.y + m.z * rotate.y.z;
-    result.z = m.x * rotate.z.x + m.y * rotate.z.y + m.z * rotate.z.z;
-    result.w = m.w;
-    result
-}
 
 pub fn translate<T: Number>(m: &Matrix4<T>, v: Vector3<T>) -> Matrix4<T> {
     let mut result = *m;

@@ -1,14 +1,19 @@
 #![allow(unused)]
-use crate::{complex::quaternion::Quaternion, linear::vector::Vector3};
+use drowsed_math::linear::{self, DVec3, FMat2, FVec2, FMat3, FVec4, FMat4};
 
-mod linear;
+use crate::{complex::quaternion::Quaternion, linear::{vector::Vector3, FVec3, IndependentEulerRotation3D}};
+
 mod complex;
 fn main() {
-    // let mat3f32_1 = linear::matrix::Matrix4::<f32>::new(0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0);
-    // let mat3f32_2 = linear::matrix::Matrix4::<f32>::new(16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0);
-    let vec2f32 = linear::USVec2::new(1, 2);
-    let vec2f64 = linear::UIVec2::from(vec2f32);
-    let vec2f32_2 = linear::USVec2::from(vec2f64);
-    let vec2f32_3 = linear::FVec2::from(vec2f32_2);
-    println!("{:#?}\n", Quaternion::<f64>::from_euler(Vector3::new(1.45, 1.45, 1.45)));
+    // let vec3 = DVec3::new(1.0, 1.0, 1.0);
+    // println!("X 90 degrees: {:#?}", vec3.rotatex(std::f64::consts::PI/2.0));
+    // println!("X 180 degrees: {:#?}", vec3.rotatex(std::f64::consts::PI));
+    // println!("X 360 degrees: {:#?}", vec3.rotatex(std::f64::consts::PI*2.0));
+    // println!("Y 90 degrees: {:#?}", vec3.rotatey(std::f64::consts::PI/2.0));
+    // println!("Y 180 degrees: {:#?}", vec3.rotatey(std::f64::consts::PI));
+    // println!("Y 360 degrees: {:#?}", vec3.rotatey(std::f64::consts::PI*2.0));
+    // println!("Z 90 degrees: {:#?}", vec3.rotatez(std::f64::consts::PI/2.0));
+    // println!("Z 180 degrees: {:#?}", vec3.rotatez(std::f64::consts::PI));
+    // println!("Z 360 degrees: {:#?}", vec3.rotatez(std::f64::consts::PI*2.0));
+    print!("{:#?}", ( Quaternion::<f32>::from_euler(FVec3::new(0.0, 0.0, 1.0)) * FVec3::new(0.0, 1.0, 0.0)));
 }

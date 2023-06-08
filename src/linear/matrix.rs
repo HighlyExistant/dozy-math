@@ -1,4 +1,4 @@
-use crate::complex::quaternion::Quaternion;
+use crate::complex::{quaternion::Quaternion, self};
 
 use super::{vector::{Vector2, Vector3, Vector4}, traits::Number};
 
@@ -80,6 +80,21 @@ impl<T: Number> std::ops::Mul for Matrix2<T>  {
     }
     type Output = Self;
 }
+impl<T: Number> std::ops::Mul<Vector2<T>> for Matrix2<T>  {
+    /// # Multiplying Matrix2 with Vector2
+    /// 
+    /// when you multiply a Matrix2 with a Vector2 we treat the vector
+    /// as a 2x2 matrix * 2x1 matrix since it is impossible to multiply
+    /// a 2x1 matrix * 2x2 matrix since matrix multiplication is not commutative.
+    fn mul(self, rhs: Vector2<T>) -> Self::Output {
+        Vector2::<T> {
+            x: self.x.x * rhs.x + self.x.y * rhs.y,
+            y: self.y.x * rhs.x + self.y.y * rhs.y
+        }
+    }
+    type Output = Vector2<T>;
+}
+
 
 /// ===========================================================
 /// 
@@ -98,7 +113,6 @@ impl<T> Matrix3<T>  {
         Self { x, y, z }
     }
 }
-
 ///
 /// These functions are available for all numbers including
 /// floating point.
@@ -143,6 +157,21 @@ impl<T: Number> std::ops::Mul for Matrix3<T>  {
         }
     }
     type Output = Self;
+}
+impl<T: Number> std::ops::Mul<Vector3<T>> for Matrix3<T>  {
+    /// # Multiplying Matrix3 with Vector3
+    /// 
+    /// when you multiply a Matrix3 with a Vector3 we treat the vector
+    /// as a 3x3 matrix * 3x1 matrix since it is impossible to multiply
+    /// a 3x1 matrix * 3x3 matrix since matrix multiplication is not commutative.
+    fn mul(self, rhs: Vector3<T>) -> Self::Output {
+        Vector3::<T> {
+            x: self.x.x * rhs.x + self.x.y * rhs.y + self.x.z * rhs.z,
+            y: self.y.x * rhs.x + self.y.y * rhs.y + self.y.z * rhs.z,
+            z: self.z.x * rhs.x + self.z.y * rhs.y + self.z.z * rhs.z
+        }
+    }
+    type Output = Vector3<T>;
 }
 
 
@@ -211,7 +240,7 @@ impl<T: Number> From<Quaternion<T>> for Matrix4<T> {
         let yz2 = y2 * value.vector.z;
         let zz2 = z2 * value.vector.z;
 
-        let sy2: T = y2 * value.scalar;
+        let sy2 = y2 * value.scalar;
         let sz2 = z2 * value.scalar;
         let sx2 = x2 * value.scalar;
 
@@ -287,4 +316,21 @@ impl<T: Number> std::ops::Mul for Matrix4<T>  {
         }
     }
     type Output = Self;
+}
+
+impl<T: Number> std::ops::Mul<Vector4<T>> for Matrix4<T>  {
+    /// # Multiplying Matrix4 with Vector4
+    /// 
+    /// when you multiply a Matrix4 with a Vector4 we treat the vector
+    /// as a 4x4 matrix * 4x1 matrix since it is impossible to multiply
+    /// a 4x1 matrix * 4x4 matrix since matrix multiplication is not commutative.
+    fn mul(self, rhs: Vector4<T>) -> Self::Output {
+        Vector4::<T> {
+            x: self.x.x * rhs.x + self.x.y * rhs.y + self.x.z * rhs.z + self.x.w * rhs.w,
+            y: self.y.x * rhs.x + self.y.y * rhs.y + self.y.z * rhs.z + self.y.w * rhs.w,
+            z: self.z.x * rhs.x + self.z.y * rhs.y + self.z.z * rhs.z + self.z.w * rhs.w,
+            w: self.w.x * rhs.x + self.w.y * rhs.y + self.w.z * rhs.z + self.w.w * rhs.w
+        }
+    }
+    type Output = Vector4<T>;
 }
