@@ -5,8 +5,9 @@ pub mod traits;
 pub mod vector;
 pub mod matrix;
 pub mod rotation;
+pub mod transform;
 pub use rotation::*;
-
+pub use transform::*;
 // Vector types
 
 pub type FVec2 = vector::Vector2<f32>;

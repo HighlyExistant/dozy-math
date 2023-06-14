@@ -1,7 +1,7 @@
 use core::fmt;
 use std::ops::{SubAssign, MulAssign, DivAssign, RemAssign, AddAssign};
 
-use num_traits::{Num, NumCast, Float, Signed, Unsigned};
+use num_traits::{Num, NumCast, Float, Signed, Unsigned, Bounded};
 
 
 pub trait Number:
@@ -17,6 +17,7 @@ pub trait Number:
     + MulAssign
     + DivAssign
     + RemAssign
+    + Bounded
 {
 }
 
@@ -33,6 +34,7 @@ impl<T> Number for T where
         + MulAssign
         + DivAssign
         + RemAssign
+        + Bounded
 {
 }
 pub trait SignedNumber: 

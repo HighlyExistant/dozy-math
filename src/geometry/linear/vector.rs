@@ -1,7 +1,12 @@
 #![allow(unused)]
-use num_traits::{Num, AsPrimitive};
+use num_traits::{Num, AsPrimitive, Zero};
 
 use super::{traits::{Number, FloatingPoint, UnsignedNumber}, matrix::{Matrix2, Matrix3, Matrix4}};
+
+pub trait Vector: Copy + Clone {
+    fn size() -> usize;
+}
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Vector2<T> {
@@ -45,17 +50,35 @@ impl<T: Clone + Copy> From<T> for Vector2<T> {
         Self { x: value, y: value }
     }
 }
+impl<T: Clone + Copy + Number> Vector for Vector2<T> {
+    fn size() -> usize {
+        2
+    }
+}
+
+impl<T: Number> Zero for Vector2<T>  {
+    fn is_zero(&self) -> bool {
+        self.x == T::zero() && self.y == T::zero()
+    }
+    fn set_zero(&mut self) {
+        self.x = T::zero();
+        self.y = T::zero();
+    }
+    fn zero() -> Self {
+        Self { x: T::zero(), y: T::zero() }
+    }
+}
 
 ///
 /// These functions are available for all numbers including
 /// floating point.
 /// 
 impl<T: Number> Vector2<T>  {
-    pub fn dot(&self, other: Self) -> T {
-        (self.x * other.x) + (self.y * other.y)
-    }
     pub fn cross(&self, other: Self) -> T {
         (self.x * other.y) - (self.y * other.x)
+    }
+    pub fn dot(&self, other: Self) -> T {
+        (self.x * other.x) + (self.y * other.y)
     }
 }
 
@@ -193,20 +216,42 @@ impl<T: Clone + Copy> From<T> for Vector3<T> {
     }
 }
 
+impl<T: Clone + Copy + Number> Vector for Vector3<T> {
+    fn size() -> usize {
+        3
+    }
+}
+
+impl<T: Number> Zero for Vector3<T>  {
+    fn is_zero(&self) -> bool {
+        self.x == T::zero() && self.y == T::zero() && self.z == T::zero()
+    }
+    fn set_zero(&mut self) {
+        self.x = T::zero();
+        self.y = T::zero();
+        self.z = T::zero();
+    }
+    fn zero() -> Self {
+        Self { x: T::zero(), y: T::zero(), z: T::zero() }
+    }
+}
 ///
 /// These functions are available for all numbers including
 /// floating point.
 /// 
 impl<T: Number> Vector3<T>  {
-    pub fn dot(&self, other: Self) -> T {
-        (self.x * other.x) + (self.y * other.y) + (self.z * other.z)
-    }
     pub fn cross(&self, other: Self) -> Self {
         Self::new(
             (self.y * other.z) - (self.z * other.y),
             (self.z * other.x) - (self.x * other.z),
             (self.x * other.y) - (self.y * other.x),
         )
+    }
+    pub fn dot(&self, other: Self) -> T {
+        (self.x * other.x) + (self.y * other.y) + (self.z * other.z)
+    }
+    pub fn xy(&self) -> Vector2<T> {
+        Vector2 { x: self.x, y: self.y }
     }
 }
 
@@ -254,9 +299,13 @@ impl<T: Number> std::ops::Mul<T> for Vector3<T>  {
     }
     type Output = Self;
 }
-impl<T: Number> std::ops::Div<T> for Vector3<T>  {
-    fn div(self, rhs: T) -> Self::Output {
-        Self { x: (self.x / rhs), y: (self.y / rhs), z: (self.z / rhs) }
+impl<T: Number> std::ops::Neg for Vector3<T>  {
+    fn neg(self) -> Self::Output {
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
     }
     type Output = Self;
 }
@@ -345,6 +394,26 @@ impl<T: Clone + Copy> From<T> for Vector4<T> {
     }
 }
 
+impl<T: Clone + Copy + Number> Vector for Vector4<T> {
+    fn size() -> usize {
+        4
+    }
+}
+impl<T: Number> Zero for Vector4<T>  {
+    fn is_zero(&self) -> bool {
+        self.x == T::zero() && self.y == T::zero() && self.z == T::zero() && self.w == T::zero()
+    }
+    fn set_zero(&mut self) {
+        self.x = T::zero();
+        self.y = T::zero();
+        self.z = T::zero();
+        self.w = T::zero();
+    }
+    fn zero() -> Self {
+        Self { x: T::zero(), y: T::zero(), z: T::zero(), w: T::zero() }
+    }
+}
+
 ///
 /// These functions are available for all numbers including
 /// floating point.
@@ -352,6 +421,10 @@ impl<T: Clone + Copy> From<T> for Vector4<T> {
 impl<T: Number> Vector4<T>  {
     pub fn dot(&self, other: Self) -> T {
         (self.x * other.x) + (self.y * other.y) + (self.z * other.z) + (self.w * other.w)
+    }
+    
+    pub fn xyz(&self) -> Vector3<T> {
+        Vector3 { x: self.x, y: self.y, z: self.z }
     }
 }
 
