@@ -1,7 +1,7 @@
 use core::fmt;
 use std::ops::{SubAssign, MulAssign, DivAssign, RemAssign, AddAssign};
 
-use num_traits::{Num, NumCast, Float, Signed, Unsigned, Bounded};
+use num_traits::{Num, NumCast, Float, Signed, Unsigned, Bounded, AsPrimitive};
 
 
 pub trait Number:
@@ -65,11 +65,15 @@ impl<T> UnsignedNumber for T where
 pub trait FloatingPoint:
     Number
     + Float
+    + AsPrimitive<f32>
+    + AsPrimitive<f64>
 {
 }
 
 impl<T> FloatingPoint for T where
     T: Number
         + Float
+        + AsPrimitive<f32>
+        + AsPrimitive<f64>
 {
 }

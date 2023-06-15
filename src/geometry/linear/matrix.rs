@@ -94,6 +94,14 @@ impl<T: Number> std::ops::Mul<Vector2<T>> for Matrix2<T>  {
     }
     type Output = Vector2<T>;
 }
+impl<T: Number> From<T> for Matrix2<T> {
+    ///
+    /// Makes every element in  the matrix the value specified
+    /// 
+    fn from(value: T) -> Self {
+        Self { x: Vector2::from(value), y: Vector2::from(value) }
+    }
+}
 
 
 /// ===========================================================
@@ -120,6 +128,13 @@ impl<T> Matrix3<T>  {
 impl<T: Number> Matrix3<T>  {
     pub fn identity(val: T) -> Self {
         Self { x: Vector3 { x: val, y: T::zero(), z: T::zero() }, y: Vector3 { x: T::zero(), y: val, z: T::zero() }, z: Vector3 { x: T::zero(), y: T::zero(), z: val } }
+    }
+    pub fn from_scale(v: Vector3<T>) -> Self {
+        Matrix3::new(
+            v.x, T::zero(), T::zero(), 
+            T::zero(), v.y, T::zero(), 
+            T::zero(), T::zero(), v.z
+        )
     }
 }
 
@@ -172,6 +187,14 @@ impl<T: Number> std::ops::Mul<Vector3<T>> for Matrix3<T>  {
         }
     }
     type Output = Vector3<T>;
+}
+impl<T: Number> From<T> for Matrix3<T> {
+    ///
+    /// Makes every element in  the matrix the value specified
+    /// 
+    fn from(value: T) -> Self {
+        Self { x: Vector3::from(value), y: Vector3::from(value), z: Vector3::from(value) }
+    }
 }
 
 
@@ -272,6 +295,14 @@ impl<T: Number> From<Quaternion<T>> for Matrix4<T> {
         }
     }
 }
+impl<T: Number> From<T> for Matrix4<T> {
+    ///
+    /// Makes every element in  the matrix the value specified
+    /// 
+    fn from(value: T) -> Self {
+        Self { x: Vector4::from(value), y: Vector4::from(value), z: Vector4::from(value), w: Vector4::from(value) }
+    }
+}
 
 // traits for bitwise operations
 impl<T: Number> std::ops::Add for Matrix4<T>  {
@@ -333,4 +364,24 @@ impl<T: Number> std::ops::Mul<Vector4<T>> for Matrix4<T>  {
         }
     }
     type Output = Vector4<T>;
+}
+
+impl<T> From<Matrix4<T>> for Matrix3<T> {
+    fn from(value: Matrix4<T>) -> Self {
+        Self { 
+            x: Vector3 { x: value.x.x, y: value.x.y, z: value.x.z }, 
+            y: Vector3 { x: value.y.x, y: value.y.y, z: value.y.z }, 
+            z: Vector3 { x: value.z.x, y: value.z.y, z: value.z.z } 
+        }
+    }
+}
+impl<T: Number> From<Matrix3<T>> for Matrix4<T> {
+    fn from(value: Matrix3<T>) -> Self {
+        Self { 
+            x: Vector4 { x: value.x.x, y: value.x.y, z: value.x.z, w: T::zero() }, 
+            y: Vector4 { x: value.y.x, y: value.y.y, z: value.y.z, w: T::zero() }, 
+            z: Vector4 { x: value.z.x, y: value.z.y, z: value.z.z, w: T::zero() },
+            w: Vector4 { x: T::zero(), y: T::zero(), z: T::zero(), w: T::one() },
+        }
+    }
 }

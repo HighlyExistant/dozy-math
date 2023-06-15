@@ -95,3 +95,7 @@ pub fn translate<T: Number>(m: &Matrix4<T>, v: Vector3<T>) -> Matrix4<T> {
     result.w = m.x * v.x + m.y * v.y + m.z * v.z + m.w;
     result
 }
+
+pub fn lerp<T: FloatingPoint>(a: T, b: T, t: T) -> T {
+    a + (b - a) * t
+}

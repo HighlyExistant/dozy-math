@@ -1,4 +1,6 @@
 #![allow(unused)]
+use std::ops::Add;
+
 use num_traits::{Num, AsPrimitive, Zero};
 
 use super::{traits::{Number, FloatingPoint, UnsignedNumber}, matrix::{Matrix2, Matrix3, Matrix4}};
@@ -82,82 +84,6 @@ impl<T: Number> Vector2<T>  {
     }
 }
 
-// traits for bitwise operations
-impl<T: Number> std::ops::Add for Vector2<T>  {
-    fn add(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x + rhs.x), y: (self.y + rhs.y) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Sub for Vector2<T>  {
-    fn sub(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x - rhs.x), y: (self.y - rhs.y) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Mul for Vector2<T>  {
-    fn mul(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x * rhs.x), y: (self.y * rhs.y) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Div for Vector2<T>  {
-    fn div(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x / rhs.x), y: (self.y / rhs.y) }
-    }
-    type Output = Self;
-}
-
-// Operations on scalar values
-impl<T: Number> std::ops::Add<T> for Vector2<T>  {
-    fn add(self, rhs: T) -> Self::Output {
-        Self { x: (self.x + rhs), y: (self.y + rhs) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Sub<T> for Vector2<T>  {
-    fn sub(self, rhs: T) -> Self::Output {
-        Self { x: (self.x - rhs), y: (self.y - rhs) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Mul<T> for Vector2<T>  {
-    fn mul(self, rhs: T) -> Self::Output {
-        Self { x: (self.x * rhs), y: (self.y * rhs) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Div<T> for Vector2<T>  {
-    fn div(self, rhs: T) -> Self::Output {
-        Self { x: (self.x / rhs), y: (self.y / rhs) }
-    }
-    type Output = Self;
-}
-
-impl<T: Number> std::ops::AddAssign for Vector2<T>  {
-    fn add_assign(&mut self, rhs: Self) {
-        self.x += rhs.x;
-        self.y += rhs.y;
-    }
-}
-impl<T: Number> std::ops::SubAssign for Vector2<T>  {
-    fn sub_assign(&mut self, rhs: Self) {
-        self.x -= rhs.x;
-        self.y -= rhs.y;
-    }
-}
-impl<T: Number> std::ops::MulAssign for Vector2<T>  {
-    fn mul_assign(&mut self, rhs: Self) {
-        self.x *= rhs.x;
-        self.y *= rhs.y;
-    }
-}
-impl<T: Number> std::ops::DivAssign for Vector2<T>  {
-    fn div_assign(&mut self, rhs: Self) {
-        self.x /= rhs.x;
-        self.y /= rhs.y;
-    }
-}
 impl<T: Number> std::ops::Mul<Matrix2<T>> for Vector2<T>  {
     /// # Multiplying Vector2 with Matrix2
     /// 
@@ -254,90 +180,6 @@ impl<T: Number> Vector3<T>  {
         Vector2 { x: self.x, y: self.y }
     }
 }
-
-// traits for bitwise operations
-impl<T: Number> std::ops::Add for Vector3<T>  {
-    fn add(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x + rhs.x), y: (self.y + rhs.y), z: (self.z + rhs.z) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Sub for Vector3<T>  {
-    fn sub(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x - rhs.x), y: (self.y - rhs.y), z: (self.z - rhs.z) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Mul for Vector3<T>  {
-    fn mul(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x * rhs.x), y: (self.y * rhs.y), z: (self.z * rhs.z) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Div for Vector3<T>  {
-    fn div(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x / rhs.x), y: (self.y / rhs.y), z: (self.z / rhs.z) }
-    }
-    type Output = Self;
-}
-// Operations on scalar values
-impl<T: Number> std::ops::Add<T> for Vector3<T>  {
-    fn add(self, rhs: T) -> Self::Output {
-        Self { x: (self.x + rhs), y: (self.y + rhs), z: (self.z + rhs) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Sub<T> for Vector3<T>  {
-    fn sub(self, rhs: T) -> Self::Output {
-        Self { x: (self.x - rhs), y: (self.y - rhs), z: (self.z - rhs) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Mul<T> for Vector3<T>  {
-    fn mul(self, rhs: T) -> Self::Output {
-        Self { x: (self.x * rhs), y: (self.y * rhs), z: (self.z * rhs) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Neg for Vector3<T>  {
-    fn neg(self) -> Self::Output {
-        Self {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
-    }
-    type Output = Self;
-}
-
-impl<T: Number> std::ops::AddAssign for Vector3<T>  {
-    fn add_assign(&mut self, rhs: Self) {
-        self.x += rhs.x;
-        self.y += rhs.y;
-        self.z += rhs.z;
-    }
-}
-impl<T: Number> std::ops::SubAssign for Vector3<T>  {
-    fn sub_assign(&mut self, rhs: Self) {
-        self.x -= rhs.x;
-        self.y -= rhs.y;
-        self.z -= rhs.z;
-    }
-}
-impl<T: Number> std::ops::MulAssign for Vector3<T>  {
-    fn mul_assign(&mut self, rhs: Self) {
-        self.x *= rhs.x;
-        self.y *= rhs.y;
-        self.z *= rhs.z;
-    }
-}
-impl<T: Number> std::ops::DivAssign for Vector3<T>  {
-    fn div_assign(&mut self, rhs: Self) {
-        self.x /= rhs.x;
-        self.y /= rhs.y;
-        self.z /= rhs.z;
-    }
-}
 impl<T: Number> std::ops::Mul<Matrix3<T>> for Vector3<T>  {
     /// # Multiplying Vector3 with Matrix3
     /// 
@@ -428,90 +270,6 @@ impl<T: Number> Vector4<T>  {
     }
 }
 
-// traits for bitwise operations
-impl<T: Number> std::ops::Add for Vector4<T>  {
-    fn add(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x + rhs.x), y: (self.y + rhs.y), z: (self.z + rhs.z), w: (self.w + rhs.w) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Sub for Vector4<T>  {
-    fn sub(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x - rhs.x), y: (self.y - rhs.y), z: (self.z - rhs.z), w: (self.w - rhs.w) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Mul for Vector4<T>  {
-    fn mul(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x * rhs.x), y: (self.y * rhs.y), z: (self.z * rhs.z), w: (self.w * rhs.w) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Div for Vector4<T>  {
-    fn div(self, rhs: Self) -> Self::Output {
-        Self { x: (self.x / rhs.x), y: (self.y / rhs.y), z: (self.z / rhs.z), w: (self.w / rhs.w) }
-    }
-    type Output = Self;
-}
-// Operations on scalar values
-
-impl<T: Number> std::ops::Add<T> for Vector4<T>  {
-    fn add(self, rhs: T) -> Self::Output {
-        Self { x: (self.x + rhs), y: (self.y + rhs), z: (self.z + rhs), w: (self.w + rhs) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Sub<T> for Vector4<T>  {
-    fn sub(self, rhs: T) -> Self::Output {
-        Self { x: (self.x - rhs), y: (self.y - rhs), z: (self.z - rhs), w: (self.w - rhs) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Mul<T> for Vector4<T>  {
-    fn mul(self, rhs: T) -> Self::Output {
-        Self { x: (self.x * rhs), y: (self.y * rhs), z: (self.z * rhs), w: (self.w * rhs) }
-    }
-    type Output = Self;
-}
-impl<T: Number> std::ops::Div<T> for Vector4<T>  {
-    fn div(self, rhs: T) -> Self::Output {
-        Self { x: (self.x / rhs), y: (self.y / rhs), z: (self.z / rhs), w: (self.w / rhs) }
-    }
-    type Output = Self;
-}
-
-impl<T: Number> std::ops::AddAssign for Vector4<T>  {
-    fn add_assign(&mut self, rhs: Self) {
-        self.x += rhs.x;
-        self.y += rhs.y;
-        self.z += rhs.z;
-        self.w += rhs.w;
-    }
-}
-impl<T: Number> std::ops::SubAssign for Vector4<T>  {
-    fn sub_assign(&mut self, rhs: Self) {
-        self.x -= rhs.x;
-        self.y -= rhs.y;
-        self.z -= rhs.z;
-        self.w -= rhs.w;
-    }
-}
-impl<T: Number> std::ops::MulAssign for Vector4<T>  {
-    fn mul_assign(&mut self, rhs: Self) {
-        self.x *= rhs.x;
-        self.y *= rhs.y;
-        self.z *= rhs.z;
-        self.w *= rhs.w;
-    }
-}
-impl<T: Number> std::ops::DivAssign for Vector4<T>  {
-    fn div_assign(&mut self, rhs: Self) {
-        self.x /= rhs.x;
-        self.y /= rhs.y;
-        self.z /= rhs.z;
-        self.w /= rhs.w;
-    }
-}
 impl<T: Number> std::ops::Mul<Matrix4<T>> for Vector4<T>  {
     /// # Multiplying Vector4 with Matrix4
     /// 
@@ -554,6 +312,90 @@ impl<T: FloatingPoint> Vector4<T>  {
 /// maybe even unnecessary but im bored so im leveraging macros.
 /// 
 /// ===========================================================
+macro_rules! impl_ops {
+    ($vector:ident , $($element:tt),+) => {
+        impl<T: Number> Add for $vector <T>  {
+            fn add(self, rhs: Self) -> Self::Output {
+                
+                Self { $($element : self.$element + rhs.$element),+ }
+            }
+            type Output = Self;
+        }
+        impl<T: Number> std::ops::Sub for $vector<T>  {
+            fn sub(self, rhs: Self) -> Self::Output {
+                Self { $($element: self.$element - rhs.$element),+ }
+            }
+            type Output = Self;
+        }
+        impl<T: Number> std::ops::Mul for $vector<T>  {
+            fn mul(self, rhs: Self) -> Self::Output {
+                Self { $($element: self.$element * rhs.$element),+ }
+            }
+            type Output = Self;
+        }
+        impl<T: Number> std::ops::Div for $vector<T>  {
+            fn div(self, rhs: Self) -> Self::Output {
+                Self { $($element: self.$element / rhs.$element),+ }
+            }
+            type Output = Self;
+        }
+
+        // Operations on scalar values
+        impl<T: Number> std::ops::Add<T> for $vector<T>  {
+            fn add(self, rhs: T) -> Self::Output {
+                Self { $($element: self.$element + rhs),+ }
+            }
+            type Output = Self;
+        }
+        impl<T: Number> std::ops::Sub<T> for $vector<T>  {
+            fn sub(self, rhs: T) -> Self::Output {
+                Self { $($element: self.$element - rhs),+ }
+            }
+            type Output = Self;
+        }
+        impl<T: Number> std::ops::Mul<T> for $vector<T>  {
+            fn mul(self, rhs: T) -> Self::Output {
+                Self { $($element: self.$element * rhs),+ }
+            }
+            type Output = Self;
+        }
+        impl<T: Number> std::ops::Div<T> for $vector<T>  {
+            fn div(self, rhs: T) -> Self::Output {
+                Self { $($element: self.$element / rhs),+ }
+            }
+            type Output = Self;
+        }
+
+        impl<T: Number> std::ops::AddAssign for $vector<T>  {
+            fn add_assign(&mut self, rhs: Self) {
+                $(self.$element += rhs.$element);+
+            }
+        }
+        impl<T: Number> std::ops::SubAssign for $vector<T>  {
+            fn sub_assign(&mut self, rhs: Self) {
+                $(self.$element -= rhs.$element);+
+            }
+        }
+        impl<T: Number> std::ops::MulAssign for $vector<T>  {
+            fn mul_assign(&mut self, rhs: Self) {
+                $(self.$element *= rhs.$element);+
+            }
+        }
+        impl<T: Number> std::ops::DivAssign for $vector<T>  {
+            fn div_assign(&mut self, rhs: Self) {
+                $(self.$element /= rhs.$element);+
+            }
+        }
+        impl<T: Number> std::cmp::PartialEq<T>  for $vector<T>  {
+            fn eq(&self, other: &T) -> bool {
+                true $(&& self.$element == *other)+
+            }
+            fn ne(&self, other: &T) -> bool {
+                true $(&& self.$element == *other)+
+            }
+        }
+    };
+}
 
 macro_rules! impl_fromvec2 {
     ($typea:ident, $typeb:ident) => {
@@ -590,6 +432,17 @@ macro_rules! impl_all_from {
         )+
     };
 }
+macro_rules! impl_all_op {
+    ($mac:ident, $op:ident, $typea:ident, $($typeb:ident),+) => {
+        $(
+            $mac!($typea, $typeb);
+        )+
+    };
+}
+impl_ops!(Vector2, x, y);
+impl_ops!(Vector3, x, y, z);
+impl_ops!(Vector4, x, y, z, w);
+
 impl_all_from!(impl_fromvec2, f32, f64, i8, i16, i32, i64, u8, u16, u32, u64);
 impl_all_from!(impl_fromvec2, f64, f32, i8, i16, i32, i64, u8, u16, u32, u64);
 
@@ -604,5 +457,3 @@ impl_all_from!(impl_fromvec2, u16, u32, u64, f64, f32, i8, i16, i32, i64, u8);
 
 impl_all_from!(impl_fromvec2, u32, u64, f32, f64, i8, i16, i32, i64, u8, u16);
 impl_all_from!(impl_fromvec2, u64, f64, f32, i8, i16, i32, i64, u8, u16, u32);
-// impl_fromvec2!(f32, f64);
-// impl_fromvec2!(f64, f32);

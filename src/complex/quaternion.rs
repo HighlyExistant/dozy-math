@@ -38,6 +38,7 @@ impl Quaternion<f32>  {
     /// 
     /// this function is heavily inspired by [this stackexcgange post](https://math.stackexchange.com/questions/2975109/how-to-convert-euler-angles-to-quaternions-and-get-the-same-euler-angles-back-fr)
     pub fn from_euler(v: Vector3<f32>) -> Self {
+        
         let x = f32::sin(v.x/2.0) * f32::cos(v.z/2.0) * f32::cos(v.y/2.0) - f32::cos(v.x/2.0) * f32::sin(v.z/2.0) * f32::sin(v.y/2.0);
         let y = f32::cos(v.x/2.0) * f32::cos(v.z/2.0) * f32::sin(v.y/2.0) - f32::sin(v.x/2.0) * f32::sin(v.z/2.0) * f32::cos(v.y/2.0);
         let z = f32::cos(v.x/2.0) * f32::sin(v.z/2.0) * f32::cos(v.y/2.0) + f32::sin(v.x/2.0) * f32::cos(v.z/2.0) * f32::sin(v.y/2.0);
