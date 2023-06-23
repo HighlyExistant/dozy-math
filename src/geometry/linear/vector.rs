@@ -118,6 +118,9 @@ impl<T: FloatingPoint> Vector2<T>  {
     pub fn direction(&self) -> T {
         T::atan2(self.x, self.y)
     }
+    pub fn length(&self, other: Self) -> T {
+        self.dot(other).sqrt()
+    }
 }
 
 
@@ -212,6 +215,16 @@ impl<T: FloatingPoint> Vector3<T>  {
         let t = vector.dot(other);
         Self { x: (vector.x * t), y: (vector.y * t), z: (vector.z * t) }
     }
+    pub fn length(&self) -> T {
+        self.dot(*self).sqrt()
+    }
+}
+
+impl<T: Number> std::ops::Neg for Vector3<T> {
+    fn neg(self) -> Self::Output {
+        Self { x: -self.x, y: -self.y, z: -self.z }
+    }
+    type Output = Self;
 }
 
 
@@ -303,6 +316,9 @@ impl<T: FloatingPoint> Vector4<T>  {
         let vector = self.normalize();
         let t = vector.dot(other);
         Self { x: (vector.x * t), y: (vector.y * t), z: (vector.z * t), w: (vector.w * t) }
+    }
+    pub fn length(&self, other: Self) -> T {
+        self.dot(other).sqrt()
     }
 }
 

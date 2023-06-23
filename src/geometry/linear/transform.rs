@@ -4,7 +4,7 @@ use crate::complex::quaternion::Quaternion;
 
 use super::{translate, FVec2, FMat2, FVec3, vector::Vector3, FMat4, Rotation, FVec4, FMat3};
 
-pub trait Transform {
+pub trait Transform: Default + Clone + Copy {
     type Rotation;
     type Translation;
     type Scaling;
@@ -245,4 +245,8 @@ impl Transform for TransformQuaternion3D {
         translation.translation = pos;
         translation
     }
+}
+
+impl Default for TransformQuaternion3D {
+    fn default() -> Self { Self { translation: FVec3::from(0.0), scale: FVec3::from(1.0), rotation: Quaternion::<f32>::from_euler(FVec3::from(0.0)) } }
 }

@@ -45,6 +45,11 @@ impl Quaternion<f32>  {
         let w = f32::cos(v.x/2.0) * f32::cos(v.z/2.0) * f32::cos(v.y/2.0) + f32::sin(v.x/2.0) * f32::sin(v.z/2.0) * f32::sin(v.y/2.0);
         Self { vector: Vector3 { x, y, z }, scalar: w }
     }
+    pub fn angle_axis(angle: f32, vector: Vector3<f32>) -> Self {
+        let half_angle = angle * 0.5;
+        let s = half_angle.sin();
+        Self { vector: vector * s, scalar: half_angle.cos() }
+    }
 }
 impl Quaternion<f64>  {
     /// # from_euler
@@ -59,7 +64,13 @@ impl Quaternion<f64>  {
         let w = f64::cos(v.x/2.0) * f64::cos(v.z/2.0) * f64::cos(v.y/2.0) + f64::sin(v.x/2.0) * f64::sin(v.z/2.0) * f64::sin(v.y/2.0);
         Self { vector: Vector3 { x, y, z }, scalar: w }
     }
+    pub fn angle_axis(angle: f64, vector: Vector3<f64>) -> Self {
+        let half_angle = angle * 0.5;
+        let s = half_angle.sin();
+        Self { vector: vector * s, scalar: half_angle.cos() }
+    }
 }
+
 
 impl<T: Number> From<Quaternion<T>> for Matrix3<T> {
     fn from(value: Quaternion<T>) -> Self {
