@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display};
 
 use num_traits::Num;
 
-use crate::linear::{vector::Vector3, traits::{Number, FloatingPoint}, self, matrix::Matrix3};
+use crate::{linear::{traits::{Number, FloatingPoint}, self, matrix::Matrix3, vector::Vector3}};
 
 
 #[repr(C)]

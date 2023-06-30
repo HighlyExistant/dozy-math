@@ -3,19 +3,22 @@ use std::ops::Add;
 
 use num_traits::{Num, AsPrimitive, Zero};
 
-use super::{traits::{Number, FloatingPoint, UnsignedNumber}, matrix::{Matrix2, Matrix3, Matrix4}};
-
-pub trait Vector: Copy + Clone {
-    fn size() -> usize;
-}
-
-#[repr(C)]
+use super::{traits::{Number, FloatingPoint}, matrix::{Matrix2, Matrix3, Matrix4}};
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Vector2<T> {
     pub x: T,
     pub y: T,
 }
+#[cfg(feature = "glsl")]
+#[repr(C, align(16))]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Vector3<T> {
+    pub x: T,
+    pub y: T,
+    pub z: T,
+}
 #[repr(C)]
+#[cfg(not(feature = "glsl"))]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Vector3<T> {
     pub x: T,
@@ -30,8 +33,9 @@ pub struct Vector4<T> {
     pub z: T,
     pub w: T,
 }
-
-
+pub trait Vector: Copy + Clone {
+    fn size() -> usize;
+}
 /// ===========================================================
 /// 
 /// Implementation for Vector2
@@ -459,17 +463,36 @@ impl_ops!(Vector2, x, y);
 impl_ops!(Vector3, x, y, z);
 impl_ops!(Vector4, x, y, z, w);
 
-impl_all_from!(impl_fromvec2, f32, f64, i8, i16, i32, i64, u8, u16, u32, u64);
-impl_all_from!(impl_fromvec2, f64, f32, i8, i16, i32, i64, u8, u16, u32, u64);
+macro_rules! impl_all_from_vec {
+    ($mac:ident) => {
+        impl_all_from!($mac, f32, f64, i8, i16, i32, i64, u8, u16, u32, u64);
+        impl_all_from!($mac, f64, f32, i8, i16, i32, i64, u8, u16, u32, u64);
 
-impl_all_from!(impl_fromvec2, i8, i16, i32, i64, u8, u16, u32, u64, f32, f64);
-impl_all_from!(impl_fromvec2, i16, i32, i64, u8, u16, u32, u64, f64, f32, i8);
+        impl_all_from!($mac, i8, i16, i32, i64, u8, u16, u32, u64, f32, f64);
+        impl_all_from!($mac, i16, i32, i64, u8, u16, u32, u64, f64, f32, i8);
 
-impl_all_from!(impl_fromvec2, i32, i64, u8, u16, u32, u64, f32, f64, i8, i16);
-impl_all_from!(impl_fromvec2, i64, u8, u16, u32, u64, f64, f32, i8, i16, i32);
+        impl_all_from!($mac, i32, i64, u8, u16, u32, u64, f32, f64, i8, i16);
+        impl_all_from!($mac, i64, u8, u16, u32, u64, f64, f32, i8, i16, i32);
 
-impl_all_from!(impl_fromvec2, u8, u16, u32, u64, f32, f64, i8, i16, i32, i64);
-impl_all_from!(impl_fromvec2, u16, u32, u64, f64, f32, i8, i16, i32, i64, u8);
+        impl_all_from!($mac, u8, u16, u32, u64, f32, f64, i8, i16, i32, i64);
+        impl_all_from!($mac, u16, u32, u64, f64, f32, i8, i16, i32, i64, u8);
 
-impl_all_from!(impl_fromvec2, u32, u64, f32, f64, i8, i16, i32, i64, u8, u16);
-impl_all_from!(impl_fromvec2, u64, f64, f32, i8, i16, i32, i64, u8, u16, u32);
+        impl_all_from!($mac, u32, u64, f32, f64, i8, i16, i32, i64, u8, u16);
+        impl_all_from!($mac, u64, f64, f32, i8, i16, i32, i64, u8, u16, u32);
+    };
+}
+impl_all_from_vec!(impl_fromvec2);
+impl_all_from_vec!(impl_fromvec3);
+impl_all_from_vec!(impl_fromvec4);
+
+
+impl<T: Number> From<Vector3<T>> for Vector4<T> {
+    fn from(value: Vector3<T>) -> Self {
+        Self { x: value.x, y: value.y, z: value.z, w: T::zero() }
+    }
+}
+impl<T: Number> From<Vector4<T>> for Vector3<T> {
+    fn from(value: Vector4<T>) -> Self {
+        Self { x: value.x, y: value.y, z: value.z }
+    }
+}

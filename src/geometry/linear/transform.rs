@@ -2,7 +2,7 @@
 
 use crate::complex::quaternion::Quaternion;
 
-use super::{translate, FVec2, FMat2, FVec3, vector::Vector3, FMat4, Rotation, FVec4, FMat3};
+use super::{translate, FVec2, FMat2, FVec3, FMat4, Rotation, FVec4, FMat3};
 
 pub trait Transform: Default + Clone + Copy {
     type Rotation;
@@ -214,7 +214,7 @@ impl Transform for TransformQuaternion3D {
     }
     fn rotate(&self, rot: Self::Rotation) -> Self {
         let mut rotation = *self;
-        rotation.rotation.rotate(rot);
+        rotation.rotation = rotation.rotation.rotate(rot);
         rotation
     }
     fn translate(&self, pos: Self::Translation) -> Self {

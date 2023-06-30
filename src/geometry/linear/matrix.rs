@@ -1,6 +1,7 @@
 use crate::complex::{quaternion::Quaternion, self};
 
-use super::{vector::{Vector2, Vector3, Vector4}, traits::Number};
+use super::{Vector2, Vector3, Vector4, traits::Number};
+
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -247,6 +248,10 @@ impl<T: Number> Matrix4<T>  {
     }
     pub fn scale(&self, v: Vector3<T>) -> Self {
         Self { x: self.x * v.x, y: self.y * v.y, z: self.z * v.z, w: self.w }
+    }
+    pub fn translate(&self, v: Vector3<T>) -> Self {
+        Self { x: self.x, y: self.y, z: self.z, w: self.w + Vector4::<T>::from(v) }
+        
     }
 }
 impl<T: Number> From<Quaternion<T>> for Matrix4<T> {
