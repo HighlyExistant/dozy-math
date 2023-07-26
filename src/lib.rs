@@ -1,5 +1,4 @@
 #![allow(unused)]
-pub mod geometry;
-pub use geometry::linear;
+pub mod linear;
 pub mod complex;
-pub use geometry::linear::vector::Vector;
+pub mod data;

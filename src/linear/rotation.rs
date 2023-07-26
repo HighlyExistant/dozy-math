@@ -2,7 +2,7 @@ use num_traits::{Num, One};
 
 use crate::{linear::{Vector3}, complex::quaternion::Quaternion};
 
-use super::{traits::{Number, FloatingPoint}, matrix::{Matrix2, Matrix4, Matrix3}, Vector2, Vector4};
+use super::{traits::{Number, FloatingPoint}, matrix::{Matrix2, Matrix4, Matrix3}, Vector2, Vector4, Vector};
 
 pub trait Rotation {
     type Output;

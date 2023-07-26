@@ -3,13 +3,14 @@ use std::ops::{SubAssign, MulAssign, DivAssign, RemAssign, AddAssign};
 
 use num_traits::{Num, NumCast, Float, Signed, Unsigned, Bounded, AsPrimitive};
 
+use super::{transform, matrix::Matrix4};
+
 
 pub trait Number:
     Copy
     + Clone
     + fmt::Debug
     + Num
-    + Signed
     + NumCast
     + PartialOrd
     + AddAssign
@@ -26,7 +27,6 @@ impl<T> Number for T where
         + Clone
         + fmt::Debug
         + Num
-        + Signed
         + NumCast
         + PartialOrd
         + AddAssign
@@ -76,4 +76,8 @@ impl<T> FloatingPoint for T where
         + AsPrimitive<f32>
         + AsPrimitive<f64>
 {
+}
+pub trait FurthestVector: Sized {
+    fn furthest_vector(&self, this: &[Self], transform: &Self::Transform);
+    type Transform;
 }

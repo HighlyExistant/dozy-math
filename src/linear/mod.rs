@@ -1,16 +1,25 @@
 #![allow(unused)]
 
+use core::prelude::v1;
+
 use self::{traits::{FloatingPoint, Number}, matrix::Matrix4, vector::{Vector2, Vector3, Vector4}};
 pub mod traits;
 pub mod matrix;
+pub mod shapes;
 pub mod vector;
 pub mod rotation;
 pub mod transform;
 pub mod smoothing;
+mod segments;
+mod sdf;
+mod geometry;
+pub use sdf::*;
+pub use segments::*;
 pub use rotation::*;
 pub use transform::*;
-// Vector types
 
+// Vector types
+pub use vector::Vector;
 pub type FVec2 = Vector2<f32>;
 pub type DVec2 = Vector2<f64>;
 
@@ -94,4 +103,16 @@ pub fn translate<T: Number>(m: &Matrix4<T>, v: Vector3<T>) -> Matrix4<T> {
     let mut result = *m;
     result.w = m.x * v.x + m.y * v.y + m.z * v.z + m.w;
     result
+}
+
+pub fn slope<T: Number>(a: Vector2<T>, b: Vector2<T>) -> T {
+    (b.y - a.y) / (b.x - a.x)
+}
+
+pub fn barycentric_coordinates<T: Number>(start: Vector2<T>, end: Vector2<T>, control: Vector2<T>, p: Vector2<T>) -> Vector3<T> {
+    let div = ((start.y - end.y) * (control.x - end.x) + (end.x - start.x) * (control.y - end.y));
+    let w1 = ((start.y - end.y) * (p.x - end.x) + (end.x - start.x) * (p.y - end.y)) / div;
+    let w2 = ((end.y   - control.y) * (p.x - end.x) + (control.x - end.x) * (p.y - end.y)) / div;
+    let w3 = T::one() - w1 - w2;
+    Vector3 { x: w1, y: w2, z: w3 }
 }

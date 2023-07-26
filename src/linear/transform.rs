@@ -1,16 +1,21 @@
 #![allow(unused)]
 
-use crate::complex::quaternion::Quaternion;
+use core::num;
+use std::ops::{AddAssign, MulAssign, SubAssign, DivAssign};
+
+use crate::{complex::quaternion::Quaternion};
+use crate::linear::vector::Vector;
 
 use super::{translate, FVec2, FMat2, FVec3, FMat4, Rotation, FVec4, FMat3};
 
 pub trait Transform: Default + Clone + Copy {
     type Rotation;
-    type Translation;
-    type Scaling;
+    type Translation: num_traits::One + num_traits::Zero + Vector;
+    type Scaling: num_traits::One  + num_traits::Zero + Vector;
     fn matrix4(&self) -> FMat4 { FMat4::identity(0.0) }
     fn matrix3(&self) -> FMat3 { FMat3::identity(0.0) }
     fn matrix2(&self) -> FMat2 { FMat2::identity(0.0) }
+    fn normal_matrix(&self) -> FMat3;
 
     fn translation(&self) -> Self::Translation;
     fn rotation(&self) -> Self::Rotation;
@@ -49,6 +54,17 @@ impl Transform for Transform2D {
         
         let mat_scale = FMat2::from_vec(FVec2::new(self.scale.x, 0.0), FVec2::new(0.0, self.scale.y));
         return mat_rot * mat_scale;
+    }
+    fn matrix3(&self) -> FMat3 {
+        let sin_rot = self.rotation.sin();
+        let cos_rot = self.rotation.cos();
+        let mat_rot = FMat3::from_vec(FVec3::new(cos_rot, sin_rot, 0.0), FVec3::new(-sin_rot, cos_rot, 0.0), FVec3::from(0.0));
+        
+        let mat_scale = FMat3::from_vec(FVec3::new(self.scale.x, 0.0, 0.0), FVec3::new(0.0, self.scale.y, 0.0), FVec3::from(0.0));
+        return mat_rot * mat_scale;
+    }
+    fn normal_matrix(&self) -> FMat3 {
+        self.set_scaling(Self::Scaling::from(1.0) / self.scaling()).matrix3()
     }
     fn rotate(&self, rot: Self::Rotation) -> Self {
         let mut rotation = *self;
@@ -129,6 +145,9 @@ impl Transform for Transform3D {
 
         transform = transform * scale;
         transform
+    }
+    fn normal_matrix(&self) -> FMat3 {
+        self.set_scaling(Self::Scaling::from(1.0) / self.scaling()).matrix3()
     }
     fn rotate(&self, rot: Self::Rotation) -> Self {
         let mut rotation = *self;
@@ -211,6 +230,9 @@ impl Transform for TransformQuaternion3D {
 
         transform = transform * scale;
         transform
+    }
+    fn normal_matrix(&self) -> FMat3 {
+        self.set_scaling(Self::Scaling::from(1.0) / self.scaling()).matrix3()
     }
     fn rotate(&self, rot: Self::Rotation) -> Self {
         let mut rotation = *self;
