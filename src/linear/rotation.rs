@@ -1,26 +1,23 @@
 use num_traits::{Num, One};
 
-use crate::{linear::{Vector3}, complex::quaternion::Quaternion};
+use crate::{linear::Vector3, complex::quaternion::Quaternion};
 
 use super::{traits::{Number, FloatingPoint}, matrix::{Matrix2, Matrix4, Matrix3}, Vector2, Vector4, Vector};
 
 pub trait Rotation {
     type Output;
     type Rotate;
-    fn rotate(&self, rotate: Self::Rotate) -> Self::Output;
+    fn rotate(&self, rotate: &Self::Rotate) -> Self::Output;
 }
 
-///
-/// Rotations for floating point values in 2 dimensions.
-/// 
 impl<T: FloatingPoint> Rotation for Vector2<T> {
     type Output = Vector2<T>;
     type Rotate = T;
 
-    fn rotate(&self, rotate: T) -> Self::Output {
+    fn rotate(&self, rotate: &T) -> Self::Output {
         Self { 
-            x: self.x * T::cos(rotate) - self.y * T::sin(rotate), 
-            y: self.x * T::sin(rotate) - self.y * T::cos(rotate) 
+            x: self.x * rotate.cos() - self.y * rotate.sin(), 
+            y: self.x * rotate.sin() - self.y * rotate.cos() 
         }
     }
 }
@@ -28,24 +25,23 @@ impl<T: FloatingPoint> Rotation for Vector2<T> {
 impl<T: FloatingPoint> Rotation for Matrix2<T>  {
     type Output = Self;
     type Rotate = T;
-    /// # rotate
     /// 
     /// performs a rotation in 2 dimensions on a matrix using a linear transformation
-    /// ```
+    /// 
     /// |  x: xcos(0) y: -ysin(0)  |
     /// |  x: xsin(0) y: -ycos(0)  |
-    /// ```
+    /// 
     /// for more information see [this stack overflow post](https://stackoverflow.com/questions/14607640/rotating-a-vector-in-3d-space) and
     /// [this wikipedia article](https://en.wikipedia.org/wiki/Rotation_matrix)
-    fn rotate(&self, rotate: T) -> Self::Output {
+    fn rotate(&self, rotate: &T) -> Self::Output {
         Self {
             x: Vector2 { 
-                x: self.x.x * T::cos(rotate), 
-                y: self.x.y * T::sin(rotate) 
+                x: self.x.x * rotate.cos(), 
+                y: self.x.y * rotate.sin() 
             },      // Column 1
             y: Vector2 { 
-                x: -(self.y.x * T::sin(rotate)), 
-                y: self.y.y * T::cos(rotate) 
+                x: -(self.y.x * rotate.sin()), 
+                y: self.y.y * rotate.cos()
             },   // Column 2
         }
     }
@@ -57,25 +53,25 @@ impl<T: FloatingPoint> Rotation for Matrix2<T>  {
 /// 
 
 impl<T: FloatingPoint> Rotation for Matrix3<T> {
-    /// # rotate
     /// 
     /// perform a rotation on a Floating Point Matrix4 on an axis specified by v and an angle in radians which is
     /// the fourth scalar in v: *v.w*.
     /// 
     /// # Example
     /// ```
+    /// use drowsed_math::{FMat3, FVec4, FVec3, Rotation};
     /// 
     /// let mut transform = FMat3::identity(1.0);
     /// // Rotating along the y axis
-    /// transform = rotate(&transform, self.rotation.y, FVec4::new(0.0, 1.0, 0.0, std::f32::consts::PI));
+    /// transform = transform.rotate(&FVec4::new(0.0, 1.0, 0.0, std::f32::consts::PI));
     /// // Rotating along the x axis
-    /// transform = rotate(&transform, self.rotation.y, FVec4::new(1.0, 0.0, 0.0, std::f32::consts::PI));
+    /// transform = transform.rotate(&FVec4::new(1.0, 0.0, 0.0, std::f32::consts::PI));
     /// // Rotating along the z axis
-    /// transform = rotate(&transform, self.rotation.y, FVec4::new(0.0, 0.0, 1.0, std::f32::consts::PI));
+    /// transform = transform.rotate(&FVec4::new(0.0, 0.0, 1.0, std::f32::consts::PI));
     /// ```
     /// This function is heavily influenced from the implementation [glm](https://github.com/g-truc/glm) uses.
     /// other resources from [wikipedia](https://en.wikipedia.org/wiki/Rotation_matrix).
-    fn rotate(&self, v: Vector4<T>) -> Matrix3<T> {
+    fn rotate(&self, v: &Vector4<T>) -> Matrix3<T> {
         let a = v.w;
         let c = a.cos();
         let s = a.sin();
@@ -107,25 +103,25 @@ impl<T: FloatingPoint> Rotation for Matrix3<T> {
 }
 
 impl<T: FloatingPoint> Rotation for Matrix4<T> {
-    /// # rotate
     /// 
     /// perform a rotation on a Floating Point Matrix4 on an axis specified by v and an angle in radians which is
     /// the fourth scalar in v: *v.w*.
     /// 
     /// # Example
     /// ```
+    /// use drowsed_math::{FMat4, FVec4, FVec3, Rotation};
     /// 
     /// let mut transform = FMat4::identity(1.0);
     /// // Rotating along the y axis
-    /// transform = rotate(&transform, self.rotation.y, FVec4::new(0.0, 1.0, 0.0, std::f32::consts::PI));
+    /// transform = transform.rotate(&FVec4::new(0.0, 1.0, 0.0, std::f32::consts::PI));
     /// // Rotating along the x axis
-    /// transform = rotate(&transform, self.rotation.y, FVec4::new(1.0, 0.0, 0.0, std::f32::consts::PI));
+    /// transform = transform.rotate(&FVec4::new(1.0, 0.0, 0.0, std::f32::consts::PI));
     /// // Rotating along the z axis
-    /// transform = rotate(&transform, self.rotation.y, FVec4::new(0.0, 0.0, 1.0, std::f32::consts::PI));
+    /// transform = transform.rotate(&FVec4::new(0.0, 0.0, 1.0, std::f32::consts::PI));
     /// ```
     /// This function is heavily influenced from the implementation [glm](https://github.com/g-truc/glm) uses.
     /// other resources from [wikipedia](https://en.wikipedia.org/wiki/Rotation_matrix).
-    fn rotate(&self, v: Vector4<T>) -> Matrix4<T> {
+    fn rotate(&self, v: &Vector4<T>) -> Matrix4<T> {
         let a = v.w;
         let c = a.cos();
         let s = a.sin();
@@ -160,8 +156,8 @@ impl<T: FloatingPoint> Rotation for Matrix4<T> {
 impl<T: FloatingPoint> Rotation for Quaternion<T> {
     /// wrapper around quaternion multiplication
     #[inline]
-    fn rotate(&self, rotate: Self::Rotate) -> Self::Output {
-        *self * rotate
+    fn rotate(&self, rotate: &Self::Rotate) -> Self::Output {
+        *self * *rotate
     }
     type Output = Quaternion<T>;
     type Rotate = Quaternion<T>;

@@ -1,6 +1,4 @@
-use std::ops::DivAssign;
-
-use crate::linear::traits::Number;
+use super::Number;
 
 pub trait Average { fn mean(&self) -> Self::Output; type Output; }
 // macro_rules! impl_average { ($($primitive:ty),+) => { $( impl Average for $primitive { fn mean(data: &[Self]) -> Self { data.iter().sum::<Self>() / data.len() as Self } } )+ }; }

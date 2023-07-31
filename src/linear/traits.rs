@@ -63,7 +63,7 @@ impl<T> UnsignedNumber for T where
 
 /// Base floating point types
 pub trait FloatingPoint:
-    Number
+    SignedNumber
     + Float
     + AsPrimitive<f32>
     + AsPrimitive<f64>
@@ -71,13 +71,10 @@ pub trait FloatingPoint:
 }
 
 impl<T> FloatingPoint for T where
-    T: Number
+    T: SignedNumber
         + Float
+        + AsPrimitive<T>
         + AsPrimitive<f32>
         + AsPrimitive<f64>
 {
-}
-pub trait FurthestVector: Sized {
-    fn furthest_vector(&self, this: &[Self], transform: &Self::Transform);
-    type Transform;
 }

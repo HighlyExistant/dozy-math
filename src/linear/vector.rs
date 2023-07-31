@@ -2,9 +2,13 @@ use num_traits::Zero;
 
 use std::{ops::{Add, AddAssign, SubAssign, DivAssign, MulAssign}, iter::Sum};
 
-use super::{matrix::{Matrix4, Matrix3, Matrix2}, traits::{FloatingPoint, Number}, geometry::EuclideanGeometry};
-
-pub trait Vector: Copy + Clone + AddAssign + SubAssign + DivAssign + MulAssign + PartialEq {
+use super::{matrix::{Matrix4, Matrix3, Matrix2}, traits::{FloatingPoint, Number, SignedNumber}, geometry::EuclideanGeometry};
+pub trait Vector: 
+    Copy + Clone + 
+    AddAssign + SubAssign + DivAssign + MulAssign + 
+    PartialEq + 
+    std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Mul<Output = Self> + std::ops::Div<Output = Self> +
+    std::ops::Add<Self::Scalar, Output = Self> + std::ops::Sub<Self::Scalar, Output = Self> + std::ops::Mul<Self::Scalar, Output = Self> + std::ops::Div<Self::Scalar, Output = Self> {
     type Scalar;
     fn size() -> usize;
     fn dot(&self, other: &Self) -> Self::Scalar;
@@ -14,6 +18,10 @@ pub trait Vector: Copy + Clone + AddAssign + SubAssign + DivAssign + MulAssign +
         where <Self as Vector>::Scalar: FloatingPoint;
     fn project(&self, other: &Self) -> Self
         where <Self as Vector>::Scalar: FloatingPoint;
+    /// the distance between two vectors is calculated the same way as the length
+    /// in euclidean geometry so this function can be used the same way.
+    fn length(&self) -> <Self as Vector>::Scalar
+    where <Self as Vector>::Scalar: FloatingPoint;
 }
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -91,7 +99,24 @@ impl<T: Clone + Copy> From<T> for Vector4<T> {
         Self { x: value, y: value, z: value, w: value }
     }
 }
-
+impl<T: FloatingPoint> Vector2<T> {
+    pub fn get_orthonomal(&self, polarity: bool, allow_zero: bool) -> Self {
+        let length = self.length();
+        if length.is_zero() {
+            if polarity {
+                Self { x: T::zero(), y: if allow_zero { T::zero() } else { T::one()} }
+            } else {
+                Self { x: T::zero(), y: if allow_zero { T::zero() } else { -T::one() } }
+            }
+        } else {
+            if polarity {
+                Self { x: -self.y/length, y: self.x/length }
+            } else {
+                Self { x: self.y/length, y: -self.x/length }
+            }
+        }
+    }
+}
 impl<T: Number> Vector for Vector2<T> {
     type Scalar = T;
     fn size() -> usize {
@@ -114,6 +139,10 @@ impl<T: Number> Vector for Vector2<T> {
             where <Self as Vector>::Scalar: FloatingPoint {
         let magnitude = self.magnitude();
         Self { x: self.x / magnitude, y: self.y / magnitude }
+    }
+    fn length(&self) -> Self::Scalar
+            where Self::Scalar: FloatingPoint {
+        self.dot(self).sqrt()
     }
 }
 impl<T: Number> Vector for Vector3<T> {
@@ -139,6 +168,11 @@ impl<T: Number> Vector for Vector3<T> {
         let t = vector.dot(other);
         Self { x: (vector.x * t), y: (vector.y * t), z: (vector.z * t) }
     }
+    fn length(&self) -> Self::Scalar
+            where Self::Scalar: FloatingPoint {
+        self.dot(self).sqrt()
+    }
+    
 }
 impl<T: Number> Vector for Vector4<T> {
     type Scalar = T;
@@ -163,6 +197,10 @@ impl<T: Number> Vector for Vector4<T> {
         let t = vector.dot(other);
         Self { x: (vector.x * t), y: (vector.y * t), z: (vector.z * t), w: (vector.w * t) }
     }
+    fn length(&self) -> Self::Scalar
+            where Self::Scalar: FloatingPoint {
+        self.dot(self).sqrt()
+    }
 }
 
 impl<T: Number> EuclideanGeometry for Vector2<T> {
@@ -171,9 +209,16 @@ impl<T: Number> EuclideanGeometry for Vector2<T> {
     fn cross(&self, other: Self) -> Self::CrossProduct {
         (self.x * other.y) - (self.y * other.x)
     }
-    fn length(&self, other: &Self) -> <Self as Vector>::Scalar
-            where <Self as Vector>::Scalar: FloatingPoint {
-        self.dot(other).sqrt()
+}
+impl<T: Number> EuclideanGeometry for Vector3<T> {
+    type CrossProduct = Self;
+    
+    fn cross(&self, other: Self) -> Self::CrossProduct {
+        Self::new(
+            (self.y * other.z) - (self.z * other.y),
+            (self.z * other.x) - (self.x * other.z),
+            (self.x * other.y) - (self.y * other.x),
+        )
     }
 }
 
@@ -229,6 +274,13 @@ macro_rules! impl_ops {
             fn add(self, rhs: Self) -> Self::Output {
                 
                 Self { $($element : self.$element + rhs.$element),+ }
+            }
+            type Output = Self;
+        }
+        
+        impl<T: SignedNumber> std::ops::Neg for $vector<T> {
+            fn neg(self) -> Self::Output {
+                Self { $($element : -self.$element),+ }
             }
             type Output = Self;
         }

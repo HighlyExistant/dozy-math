@@ -1,4 +1,4 @@
-use drowsed_math::linear::FVec3;
+use drowsed_math::FVec3;
 
 pub fn create_cube(ofst: FVec3) -> (Vec<FVec3>, Vec<u32>) {
     (vec![

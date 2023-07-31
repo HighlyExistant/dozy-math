@@ -1,9 +1,6 @@
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
 
-use num_traits::Num;
-
-use crate::{linear::{traits::{Number, FloatingPoint}, self, matrix::Matrix3, vector::Vector3}};
-
+use crate::{Vector3, Matrix3, Number};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]

@@ -3,7 +3,7 @@
 use core::num;
 use std::ops::{AddAssign, MulAssign, SubAssign, DivAssign};
 
-use crate::{complex::quaternion::Quaternion};
+use crate::complex::quaternion::Quaternion;
 use crate::linear::vector::Vector;
 
 use super::{translate, FVec2, FMat2, FVec3, FMat4, Rotation, FVec4, FMat3};
@@ -123,9 +123,9 @@ impl Transform for Transform3D {
         transform.w.w = 1.0;
         transform = translate(&transform, self.translation);
         
-        transform = transform.rotate(FVec4::new(0.0, 1.0, 0.0, self.rotation.y));
-        transform = transform.rotate(FVec4::new(1.0, 0.0, 0.0, self.rotation.x));
-        transform = transform.rotate(FVec4::new(0.0, 0.0, 1.0, self.rotation.z));
+        transform = transform.rotate(&FVec4::new(0.0, 1.0, 0.0, self.rotation.y));
+        transform = transform.rotate(&FVec4::new(1.0, 0.0, 0.0, self.rotation.x));
+        transform = transform.rotate(&FVec4::new(0.0, 0.0, 1.0, self.rotation.z));
         let scale = FMat4::from_scale(self.scale);
 
         transform = transform * scale;
@@ -137,9 +137,9 @@ impl Transform for Transform3D {
         transform.y.y = 1.0;
         transform.z.z = 1.0;
 
-        transform = transform.rotate(FVec4::new(0.0, 1.0, 0.0, self.rotation.y));
-        transform = transform.rotate(FVec4::new(1.0, 0.0, 0.0, self.rotation.x));
-        transform = transform.rotate(FVec4::new(0.0, 0.0, 1.0, self.rotation.z));
+        transform = transform.rotate(&FVec4::new(0.0, 1.0, 0.0, self.rotation.y));
+        transform = transform.rotate(&FVec4::new(1.0, 0.0, 0.0, self.rotation.x));
+        transform = transform.rotate(&FVec4::new(0.0, 0.0, 1.0, self.rotation.z));
 
         let scale = FMat3::from_scale(self.scale);
 
@@ -236,7 +236,7 @@ impl Transform for TransformQuaternion3D {
     }
     fn rotate(&self, rot: Self::Rotation) -> Self {
         let mut rotation = *self;
-        rotation.rotation = rotation.rotation.rotate(rot);
+        rotation.rotation = rotation.rotation.rotate(&rot);
         rotation
     }
     fn translate(&self, pos: Self::Translation) -> Self {

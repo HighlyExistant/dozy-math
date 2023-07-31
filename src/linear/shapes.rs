@@ -4,7 +4,7 @@ use num_traits::Zero;
 
 use crate::linear::vector::Vector;
 
-use super::FVec3;
+use super::{FVec3, traits::Number, vector::Vector2};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -28,6 +28,27 @@ impl<T: Vector> IndexMut<usize> for Triangle<T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         debug_assert!(index > 2, "index for a triangle can not exceed index 2 since it only has 3 points");
         &mut self.points[index]
+    }
+}
+
+pub struct Rectangle<T: Number> {
+    top_left: Vector2<T>,
+    top_right: Vector2<T>,
+    bottom_left: Vector2<T>,
+    bottom_right: Vector2<T>,
+}
+impl<T: Number> Rectangle<T>  {
+    pub fn new(top_left: Vector2<T>, top_right: Vector2<T>, bottom_left: Vector2<T>, bottom_right: Vector2<T>) -> Self {
+        Self { top_left, top_right, bottom_left, bottom_right }
+    }
+}
+pub struct Cube<T: Number> {
+    front: Rectangle<T>,
+    back: Rectangle<T>,
+}
+impl<T: Number> Cube<T>  {
+    pub fn new(front: Rectangle<T>, back: Rectangle<T>) -> Self {
+        Self { front, back }
     }
 }
 
