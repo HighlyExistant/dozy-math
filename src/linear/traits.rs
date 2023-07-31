@@ -3,6 +3,8 @@ use std::ops::{SubAssign, MulAssign, DivAssign, RemAssign, AddAssign};
 
 use num_traits::{Num, NumCast, Float, Signed, Unsigned, Bounded, AsPrimitive};
 
+use crate::equations::{QuadraticFormula, CubicFormula};
+
 use super::{transform, matrix::Matrix4};
 
 
@@ -67,6 +69,8 @@ pub trait FloatingPoint:
     + Float
     + AsPrimitive<f32>
     + AsPrimitive<f64>
+    + QuadraticFormula
+    + CubicFormula
 {
 }
 
@@ -76,5 +80,7 @@ impl<T> FloatingPoint for T where
         + AsPrimitive<T>
         + AsPrimitive<f32>
         + AsPrimitive<f64>
+        + QuadraticFormula
+        + CubicFormula
 {
 }

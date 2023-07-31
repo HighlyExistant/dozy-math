@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 
-use crate::{Vector3, Matrix3, Number};
+use num_traits::AsPrimitive;
+
+use crate::{Vector3, Matrix3, Number, FloatingPoint};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -22,52 +24,30 @@ impl<T> Quaternion<T>  {
     pub fn new(v: Vector3<T>, s: T) -> Self {
         Self { vector: v, scalar: s }
     }
-}
-
-///
-/// These functions are available for all numbers including
-/// floating point.
-/// 
-impl Quaternion<f32>  {
     /// # from_euler
     /// 
     /// converts euler angles into quaternion form.
     /// 
     /// this function is heavily inspired by [this stackexcgange post](https://math.stackexchange.com/questions/2975109/how-to-convert-euler-angles-to-quaternions-and-get-the-same-euler-angles-back-fr)
-    pub fn from_euler(v: Vector3<f32>) -> Self {
-        
-        let x = f32::sin(v.x/2.0) * f32::cos(v.z/2.0) * f32::cos(v.y/2.0) - f32::cos(v.x/2.0) * f32::sin(v.z/2.0) * f32::sin(v.y/2.0);
-        let y = f32::cos(v.x/2.0) * f32::cos(v.z/2.0) * f32::sin(v.y/2.0) - f32::sin(v.x/2.0) * f32::sin(v.z/2.0) * f32::cos(v.y/2.0);
-        let z = f32::cos(v.x/2.0) * f32::sin(v.z/2.0) * f32::cos(v.y/2.0) + f32::sin(v.x/2.0) * f32::cos(v.z/2.0) * f32::sin(v.y/2.0);
-        let w = f32::cos(v.x/2.0) * f32::cos(v.z/2.0) * f32::cos(v.y/2.0) + f32::sin(v.x/2.0) * f32::sin(v.z/2.0) * f32::sin(v.y/2.0);
+    pub fn from_euler(v: Vector3<T>) -> Self 
+        where T: FloatingPoint,
+        f32: AsPrimitive<T>, 
+        f64: AsPrimitive<T> {
+        let x = T::sin(v.x/2.0.as_()) * T::cos(v.z/2.0.as_()) * T::cos(v.y/2.0.as_()) - T::cos(v.x/2.0.as_()) * T::sin(v.z/2.0.as_()) * T::sin(v.y/2.0.as_());
+        let y = T::cos(v.x/2.0.as_()) * T::cos(v.z/2.0.as_()) * T::sin(v.y/2.0.as_()) - T::sin(v.x/2.0.as_()) * T::sin(v.z/2.0.as_()) * T::cos(v.y/2.0.as_());
+        let z = T::cos(v.x/2.0.as_()) * T::sin(v.z/2.0.as_()) * T::cos(v.y/2.0.as_()) + T::sin(v.x/2.0.as_()) * T::cos(v.z/2.0.as_()) * T::sin(v.y/2.0.as_());
+        let w = T::cos(v.x/2.0.as_()) * T::cos(v.z/2.0.as_()) * T::cos(v.y/2.0.as_()) + T::sin(v.x/2.0.as_()) * T::sin(v.z/2.0.as_()) * T::sin(v.y/2.0.as_());
         Self { vector: Vector3 { x, y, z }, scalar: w }
     }
-    pub fn angle_axis(angle: f32, vector: Vector3<f32>) -> Self {
-        let half_angle = angle * 0.5;
+    pub fn angle_axis(angle: T, vector: Vector3<T>) -> Self 
+        where T: FloatingPoint,
+        f32: AsPrimitive<T>, 
+        f64: AsPrimitive<T> {
+        let half_angle = angle * 0.5.as_();
         let s = half_angle.sin();
         Self { vector: vector * s, scalar: half_angle.cos() }
     }
 }
-impl Quaternion<f64>  {
-    /// # from_euler
-    /// 
-    /// converts euler angles into quaternion form.
-    /// 
-    /// this function is heavily inspired by [this stackexcgange post](https://math.stackexchange.com/questions/2975109/how-to-convert-euler-angles-to-quaternions-and-get-the-same-euler-angles-back-fr)
-    pub fn from_euler(v: Vector3<f64>) -> Self {
-        let x = f64::sin(v.x/2.0) * f64::cos(v.z/2.0) * f64::cos(v.y/2.0) - f64::cos(v.x/2.0) * f64::sin(v.z/2.0) * f64::sin(v.y/2.0);
-        let y = f64::cos(v.x/2.0) * f64::cos(v.z/2.0) * f64::sin(v.y/2.0) - f64::sin(v.x/2.0) * f64::sin(v.z/2.0) * f64::cos(v.y/2.0);
-        let z = f64::cos(v.x/2.0) * f64::sin(v.z/2.0) * f64::cos(v.y/2.0) + f64::sin(v.x/2.0) * f64::cos(v.z/2.0) * f64::sin(v.y/2.0);
-        let w = f64::cos(v.x/2.0) * f64::cos(v.z/2.0) * f64::cos(v.y/2.0) + f64::sin(v.x/2.0) * f64::sin(v.z/2.0) * f64::sin(v.y/2.0);
-        Self { vector: Vector3 { x, y, z }, scalar: w }
-    }
-    pub fn angle_axis(angle: f64, vector: Vector3<f64>) -> Self {
-        let half_angle = angle * 0.5;
-        let s = half_angle.sin();
-        Self { vector: vector * s, scalar: half_angle.cos() }
-    }
-}
-
 
 impl<T: Number> From<Quaternion<T>> for Matrix3<T> {
     fn from(value: Quaternion<T>) -> Self {

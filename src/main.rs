@@ -11,7 +11,7 @@ use crate::complex::Complex;
 use equations::QuadraticFormula;
 use equations::CubicFormula;
 fn main() {
-    // let c0 = Complex::new(2.0, 3.0);
-    // let c1 = Complex::new(4.0, 6.0);
-    println!("{:#?}", f64::cubic_formula(1.0, 3.0, 1.0, -0.5));
+    let segment = QuadraticSegment::new(FVec2::new(0.5,1.0), FVec2::new(0.0,1.4), FVec2::new(-0.5,0.9));
+    let v0 = FVec2::new(0.0, 1.1);
+    println!("{:#?}", segment.signed_distance(v0));
 }

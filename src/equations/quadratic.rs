@@ -1,6 +1,6 @@
-use crate::{complex::Complex, FloatingPoint};
+use crate::{complex::Complex, FloatingPoint, Number};
 #[derive(Debug)]
-pub enum QuadraticSolution<T: FloatingPoint> {
+pub enum QuadraticSolution<T: Number> {
     // used when all variables apart from the final offset variable are 0 this causes the graph to 
     // be at a constant change equal to the value.
     None(T),
@@ -9,10 +9,10 @@ pub enum QuadraticSolution<T: FloatingPoint> {
     // used either when the quadratic term is 0 making it a linear equation or when the discriminant is equal to 0
     // making a repeated root.
     OneReal(T),
-    TwoReal(T, T),
-    TwoComplex(Complex<T>, Complex<T>),
+    TwoReal([T; 2]),
+    TwoComplex([Complex<T>; 2]),
 }
-pub trait QuadraticFormula: Sized + FloatingPoint {
+pub trait QuadraticFormula: Sized + Number {
     /// used to solve the equation ax^2 + bx + c
     /// returns the amount of solutions found and an array filled with
     /// the solutions. Unlike a Linear equation or a Cubic equation 
@@ -42,13 +42,13 @@ impl QuadraticFormula for f32 {
         let discriminant = b * b - 4.0 * a * c;
         if discriminant > 0.0 {
             let sqrt_dscr = discriminant.sqrt();
-            return QuadraticSolution::TwoReal((-b+sqrt_dscr)/(2.0*a), (-b-sqrt_dscr)/(2.0*a));
+            return QuadraticSolution::TwoReal([(-b+sqrt_dscr)/(2.0*a), (-b-sqrt_dscr)/(2.0*a)]);
         } else if discriminant == 0.0 {
             return QuadraticSolution::OneReal(-b/(2.0*a));
         } else {
             let isqrt_dscr_1 = Complex::new(-b, discriminant.abs().sqrt()) * Complex::new(0.0, 1.0/(2.0*a));
             let isqrt_dscr_2 = Complex::new(-b, -discriminant.abs().sqrt()) * Complex::new(0.0, 1.0/(2.0*a));
-            return QuadraticSolution::TwoComplex(isqrt_dscr_1, isqrt_dscr_2);
+            return QuadraticSolution::TwoComplex([isqrt_dscr_1, isqrt_dscr_2]);
         }
     }
 }
@@ -72,7 +72,7 @@ impl QuadraticFormula for f64 {
         let discriminant = b * b - 4.0 * a * c;
         if discriminant > 0.0 {
             let sqrt_dscr = discriminant.sqrt();
-            return QuadraticSolution::TwoReal((-b+sqrt_dscr)/(2.0*a), (-b-sqrt_dscr)/(2.0*a));
+            return QuadraticSolution::TwoReal([(-b+sqrt_dscr)/(2.0*a), (-b-sqrt_dscr)/(2.0*a)]);
         } else if discriminant == 0.0 {
             return QuadraticSolution::OneReal(-b/(2.0*a));
         } else { // when the discriminant is less than zero there two complex solutions
@@ -80,7 +80,7 @@ impl QuadraticFormula for f64 {
             
             let solution1 = Complex::new(-b / a2, discriminant.abs().sqrt() / a2);
             let solution2 = Complex::new(solution1.re, -solution1.im);
-            return QuadraticSolution::TwoComplex(solution1, solution2);
+            return QuadraticSolution::TwoComplex([solution1, solution2]);
         }
     }
 }
