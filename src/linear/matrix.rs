@@ -1,4 +1,6 @@
-use crate::complex::{quaternion::Quaternion, self};
+use num_traits::Num;
+
+use crate::complex::quaternion::Quaternion;
 
 use super::{Vector2, Vector3, Vector4, traits::Number};
 
@@ -11,10 +13,39 @@ pub struct Matrix2<T> {
 }
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
+pub struct Matrix2x3<T> {
+    pub x: Vector2<T>,
+    pub y: Vector2<T>,
+    pub z: Vector2<T>,
+}
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Matrix2x4<T> {
+    pub x: Vector2<T>,
+    pub y: Vector2<T>,
+    pub z: Vector2<T>,
+    pub w: Vector2<T>,
+}
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Matrix3<T> {
     pub x: Vector3<T>,
     pub y: Vector3<T>,
     pub z: Vector3<T>,
+}
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Matrix3x2<T> {
+    pub x: Vector3<T>,
+    pub y: Vector3<T>,
+}
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Matrix3x4<T> {
+    pub x: Vector3<T>,
+    pub y: Vector3<T>,
+    pub z: Vector3<T>,
+    pub w: Vector3<T>,
 }
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -23,6 +54,12 @@ pub struct Matrix4<T> {
     pub y: Vector4<T>,
     pub z: Vector4<T>,
     pub w: Vector4<T>,
+}
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Matrix4x2<T> {
+    pub x: Vector4<T>,
+    pub y: Vector4<T>,
 }
 
 /// ===========================================================
@@ -103,8 +140,115 @@ impl<T: Number> From<T> for Matrix2<T> {
         Self { x: Vector2::from(value), y: Vector2::from(value) }
     }
 }
-
-
+/// ===========================================================
+/// 
+/// Implementation for Matrix2x3
+/// 
+/// ===========================================================
+impl<T> Matrix2x3<T> {
+    pub fn new(xx: T, xy: T, yx: T, yy: T, zx: T, zy: T) -> Self {
+        Self { x: Vector2 { x: xx, y: xy }, y: Vector2 { x: yx, y: yy }, z: Vector2 { x: zx, y: zy } }
+    }
+    pub fn from_vec(x: Vector2<T>, y: Vector2<T>, z: Vector2<T>) -> Self {
+        Self { x, y, z }
+    }
+}
+// traits for bitwise operations
+impl<T: Number> std::ops::Add for Matrix2x3<T>  {
+    fn add(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x + rhs.x), y: (self.y + rhs.y), z: (self.z + rhs.z) }
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Sub for Matrix2x3<T>  {
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x - rhs.x), y: (self.y - rhs.y), z: (self.z - rhs.z) }
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Mul<Matrix3<T>> for Matrix2x3<T>  {
+    fn mul(self, rhs: Matrix3<T>) -> Self::Output {
+        Self { 
+            x: Vector2 { 
+                x: self.x.x * rhs.x.x + self.y.x * rhs.x.y + self.z.x * rhs.x.z, 
+                y: self.x.y * rhs.x.x + self.y.y * rhs.x.y + self.z.y * rhs.x.z
+            }, 
+            y: Vector2 { 
+                x: self.x.x * rhs.y.x + self.y.x * rhs.y.y + self.z.x * rhs.y.z, 
+                y: self.x.y * rhs.y.x + self.y.y * rhs.y.y + self.z.y * rhs.y.z 
+            },
+            z: Vector2 { 
+                x: self.x.x * rhs.z.x + self.y.x * rhs.z.y + self.z.x * rhs.z.z,
+                y: self.x.y * rhs.z.x + self.y.y * rhs.z.y + self.z.y * rhs.z.z 
+            }
+        }
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Mul<Matrix3x2<T>> for Matrix2x3<T>  {
+    fn mul(self, rhs: Matrix3x2<T>) -> Self::Output {
+        Matrix2 {
+            x: Vector2 { 
+                x: self.x.x * rhs.x.x + self.y.x * rhs.x.y + self.z.x * rhs.x.z, 
+                y: self.x.y * rhs.x.x + self.y.y * rhs.x.y + self.z.y * rhs.x.z
+            },
+            y: Vector2 { 
+                x: self.x.x * rhs.y.x + self.y.x * rhs.y.y + self.z.x * rhs.y.z, 
+                y: self.x.y * rhs.y.x + self.y.y * rhs.y.y + self.z.y * rhs.y.z 
+            },
+        }
+    }
+    type Output = Matrix2<T>;
+}
+/// ===========================================================
+/// 
+/// Implementation for Matrix2x4
+/// 
+/// ===========================================================
+impl<T> Matrix2x4<T> {
+    pub fn new(xx: T, xy: T, yx: T, yy: T, zx: T, zy: T, wx: T, wy: T) -> Self {
+        Self { x: Vector2 { x: xx, y: xy }, y: Vector2 { x: yx, y: yy }, z: Vector2 { x: zx, y: zy }, w: Vector2 { x: wx, y: wy }  }
+    }
+    pub fn from_vec(x: Vector2<T>, y: Vector2<T>, z: Vector2<T>, w: Vector2<T>) -> Self {
+        Self { x, y, z, w }
+    }
+}
+// traits for bitwise operations
+impl<T: Number> std::ops::Add for Matrix2x4<T>  {
+    fn add(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x + rhs.x), y: (self.y + rhs.y), z: (self.z + rhs.z), w: (self.w + rhs.w) }
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Sub for Matrix2x4<T>  {
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x - rhs.x), y: (self.y - rhs.y), z: (self.z - rhs.z), w: (self.w - rhs.w)  }
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Mul<Matrix4<T>> for Matrix2x4<T> {
+    fn mul(self, rhs: Matrix4<T>) -> Self::Output {
+        Self { 
+            x: Vector2 { 
+                x: self.x.x * rhs.x.x + self.y.x * rhs.x.y + self.z.x * rhs.x.z + self.w.x * rhs.x.w, 
+                y: self.x.y * rhs.x.x + self.y.y * rhs.x.y + self.z.y * rhs.x.z + self.w.y * rhs.x.w 
+            },
+            y: Vector2 { 
+                x: self.x.x * rhs.y.x + self.y.x * rhs.y.y + self.z.x * rhs.y.z + self.w.x * rhs.y.w, 
+                y: self.x.y * rhs.y.x + self.y.y * rhs.y.y + self.z.y * rhs.y.z + self.w.y * rhs.y.w 
+            },
+            z: Vector2 { 
+                x: self.x.x * rhs.z.x + self.y.x * rhs.z.y + self.z.x * rhs.z.z + self.w.x * rhs.z.w, 
+                y: self.x.y * rhs.z.x + self.y.y * rhs.z.y + self.z.y * rhs.z.z + self.w.y * rhs.z.w 
+            },
+            w: Vector2 { 
+                x: self.x.x * rhs.w.x + self.y.x * rhs.w.y + self.z.x * rhs.w.z + self.w.x * rhs.w.w, 
+                y: self.x.y * rhs.w.x + self.y.y * rhs.w.y + self.z.y * rhs.w.z + self.w.y * rhs.w.w 
+            },
+        }
+    }
+    type Output = Self;
+}
 /// ===========================================================
 /// 
 /// Implementation for Matrix3
@@ -198,7 +342,105 @@ impl<T: Number> From<T> for Matrix3<T> {
     }
 }
 
+/// ===========================================================
+/// 
+/// Implementation for Matrix3x2
+/// 
+/// ===========================================================
 
+impl<T> Matrix3x2<T>  {
+    pub fn new(xx: T, xy: T, xz: T, yx: T, yy: T, yz: T) -> Self {
+        Self { x: Vector3 { x: xx, y: xy, z: xz }, y: Vector3 { x: yx, y: yy, z: yz } }
+    }
+    pub fn from_vec(x: Vector3<T>, y: Vector3<T>) -> Self {
+        Self { x, y }
+    }
+}
+
+// traits for bitwise operations
+impl<T: Number> std::ops::Add for Matrix3x2<T>  {
+    fn add(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x + rhs.x), y: (self.y + rhs.y) }
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Sub for Matrix3x2<T>  {
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x - rhs.x), y: (self.y - rhs.y) }
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Mul<Matrix2<T>> for Matrix3x2<T>  {
+    fn mul(self, rhs: Matrix2<T>) -> Self::Output {
+        Self { 
+            x: Vector3 { 
+                x: rhs.x.x * self.x.x + rhs.x.y * self.y.x,
+                y: rhs.x.x * self.x.y + rhs.x.y * self.y.y,
+                z: rhs.x.x * self.x.z + rhs.x.y * self.y.z,
+            }, 
+            y: Vector3 { 
+                x: rhs.y.x * self.x.x + rhs.y.y * self.y.x,
+                y: rhs.y.x * self.x.y + rhs.y.y * self.y.y,
+                z: rhs.y.x * self.x.z + rhs.y.y * self.y.z,
+            },
+        }
+    }
+    type Output = Self; 
+}
+
+/// ===========================================================
+/// 
+/// Implementation for Matrix3x4
+/// 
+/// ===========================================================
+
+impl<T> Matrix3x4<T>  {
+    pub fn new(xx: T, xy: T, xz: T, yx: T, yy: T, yz: T, zx: T, zy: T, zz: T, wx: T, wy: T, wz: T) -> Self {
+        Self { x: Vector3 { x: xx, y: xy, z: xz }, y: Vector3 { x: yx, y: yy, z: yz }, z: Vector3 { x: zx, y: zy, z: zz }, w: Vector3 { x: wx, y: wy, z: wz } }
+    }
+    pub fn from_vec(x: Vector3<T>, y: Vector3<T>, z: Vector3<T>, w: Vector3<T>) -> Self {
+        Self { x, y, z, w }
+    }
+}
+impl<T: Number> std::ops::Add for Matrix3x4<T>  {
+    fn add(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x + rhs.x), y: (self.y + rhs.y), z: (self.z + rhs.z), w: (self.w + rhs.w) }
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Sub for Matrix3x4<T>  {
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x - rhs.x), y: (self.y - rhs.y), z: (self.z - rhs.z), w: (self.w - rhs.w) }
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Mul<Matrix4<T>> for Matrix3x4<T>  {
+    fn mul(self, rhs: Matrix4<T>) -> Self::Output {
+        Self { 
+            x: Vector3 { 
+                x: rhs.x.x * self.x.x + rhs.x.y * self.y.x + rhs.x.z * self.z.x + rhs.x.w * self.w.x,
+                y: rhs.x.x * self.x.y + rhs.x.y * self.y.y + rhs.x.z * self.z.y + rhs.x.w * self.w.y,
+                z: rhs.x.x * self.x.z + rhs.x.y * self.y.z + rhs.x.z * self.z.z + rhs.x.w * self.w.z,
+            }, 
+            y: Vector3 { 
+                x: rhs.y.x * self.x.x + rhs.y.y * self.y.x + rhs.y.z * self.z.x + rhs.y.w * self.w.x,
+                y: rhs.y.x * self.x.y + rhs.y.y * self.y.y + rhs.y.z * self.z.y + rhs.y.w * self.w.y,
+                z: rhs.y.x * self.x.z + rhs.y.y * self.y.z + rhs.y.z * self.z.z + rhs.y.w * self.w.z,
+            },
+            z: Vector3 { 
+                x: rhs.z.x * self.x.x + rhs.z.y * self.y.x + rhs.z.z * self.z.x + rhs.z.w * self.w.x,
+                y: rhs.z.x * self.x.y + rhs.z.y * self.y.y + rhs.z.z * self.z.y + rhs.z.w * self.w.y,
+                z: rhs.z.x * self.x.z + rhs.z.y * self.y.z + rhs.z.z * self.z.z + rhs.z.w * self.w.z,
+            },
+            w: Vector3 { 
+                x: rhs.w.x * self.x.x + rhs.w.y * self.y.x + rhs.w.z * self.z.x + rhs.w.w * self.w.x,
+                y: rhs.w.x * self.x.y + rhs.w.y * self.y.y + rhs.w.z * self.z.y + rhs.w.w * self.w.y,
+                z: rhs.w.x * self.x.z + rhs.w.y * self.y.z + rhs.w.z * self.z.z + rhs.w.w * self.w.z,
+            }
+        }
+    }
+    type Output = Self;
+}
 /// ===========================================================
 /// 
 /// Implementation for Matrix4
@@ -390,3 +632,74 @@ impl<T: Number> From<Matrix3<T>> for Matrix4<T> {
         }
     }
 }
+
+/// ===========================================================
+/// 
+/// Implementation for Matrix4x2
+/// 
+/// ===========================================================
+
+impl<T> Matrix4x2<T>  {
+    pub fn new(xx: T, xy: T, xz: T, xw: T, yx: T, yy: T, yz: T, yw: T) -> Self {
+        Self { x: Vector4 { x: xx, y: xy, z: xz, w: xw }, y: Vector4 { x: yx, y: yy, z: yz, w: yw } }
+    }
+    pub fn from_vec(x: Vector4<T>, y: Vector4<T>, z: Vector4<T>, w: Vector4<T>) -> Self {
+        Self { x, y}
+    }
+}
+
+impl<T: Number> From<T> for Matrix4x2<T> {
+    ///
+    /// Makes every element in  the matrix the value specified
+    /// 
+    fn from(value: T) -> Self {
+        Self { x: Vector4::from(value), y: Vector4::from(value) }
+    }
+}
+
+// traits for bitwise operations
+impl<T: Number> std::ops::Add for Matrix4x2<T>  {
+    fn add(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x + rhs.x), y: (self.y + rhs.y)}
+    }
+    type Output = Self;
+}
+impl<T: Number> std::ops::Sub for Matrix4x2<T>  {
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self { x: (self.x - rhs.x), y: (self.y - rhs.y) }
+    }
+    type Output = Self;
+}
+
+impl <T: Number> std::ops::Mul<Matrix2<T>> for Matrix4x2<T> {
+    fn mul(self, rhs: Matrix2<T>) -> Self::Output {
+        Self { 
+            x: Vector4 { 
+                x: rhs.x.x * self.x.x + rhs.x.y * self.y.x,
+                y: rhs.x.x * self.x.y + rhs.x.y * self.y.y,
+                z: rhs.x.x * self.x.z + rhs.x.y * self.y.z,
+                w: rhs.x.x * self.x.w + rhs.x.y * self.y.w 
+            }, 
+            y: Vector4 { 
+                x: rhs.y.x * self.x.x + rhs.y.y * self.y.x,
+                y: rhs.y.x * self.x.y + rhs.y.y * self.y.y,
+                z: rhs.y.x * self.x.z + rhs.y.y * self.y.z,
+                w: rhs.y.x * self.x.w + rhs.y.y * self.y.w 
+            },
+        }
+    }
+    type Output = Self;
+}
+
+/*
+ * TODO LIST:
+ * Implement multiplication for the following:
+ * Matrix2x3 * Matrix3x4
+ * Matrix2x4 * Matrix4x2
+ * Matrix3x2 * Matrix2x3
+ * Matrix3x2 * Matrix2x4
+ * Matrix3x4 * Matrix4x2
+ * Matrix3x4 * Matrix4x3
+ * Matrix4x2 * Matrix2x3
+ * Matrix4x2 * Matrix2x4
+*/

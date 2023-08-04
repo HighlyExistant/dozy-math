@@ -35,6 +35,12 @@ impl CubicFormula for f32 {
                 crate::equations::QuadraticSolution::TwoComplex(c) => { CubicSolution::TwoComplex(c) }
             }
         }
+        if d == 0.0 {
+            return CubicSolution::OneReal(0.0);
+        }
+        let b = b / a;
+        let c = c / a;
+        let d = d / a;
 
         let b2 = b * b;
         let q = (3.0 * c - b2) * INV_9;

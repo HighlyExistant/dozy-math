@@ -1,6 +1,6 @@
-use num_traits::Zero;
+use num_traits::{Zero, Signed, Num, NumOps, Float};
 
-use std::{ops::{Add, AddAssign, SubAssign, DivAssign, MulAssign}, iter::Sum};
+use std::{ops::{Add, AddAssign, SubAssign, DivAssign, MulAssign, RemAssign}, iter::Sum};
 
 use super::{matrix::{Matrix4, Matrix3, Matrix2}, traits::{FloatingPoint, Number, SignedNumber}, geometry::EuclideanGeometry};
 pub trait Vector: 
@@ -24,14 +24,14 @@ pub trait Vector:
     where <Self as Vector>::Scalar: FloatingPoint;
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd)]
 pub struct Vector2<T> {
     pub x: T,
     pub y: T,
 }
 #[cfg(feature = "glsl")]
 #[repr(C, align(16))]
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd)]
 pub struct Vector3<T> {
     pub x: T,
     pub y: T,
@@ -39,14 +39,14 @@ pub struct Vector3<T> {
 }
 #[repr(C)]
 #[cfg(not(feature = "glsl"))]
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd)]
 pub struct Vector3<T> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd)]
 pub struct Vector4<T> {
     pub x: T,
     pub y: T,
@@ -115,6 +115,19 @@ impl<T: FloatingPoint> Vector2<T> {
                 Self { x: self.y/length, y: -self.x/length }
             }
         }
+    }
+    pub fn pow(&self, n: Self) -> Self {
+        Self::new(self.x.powf(n.x), self.y.powf(n.y))
+    }
+}
+impl<T: FloatingPoint> Vector3<T>  {
+    pub fn pow(&self, n: Self) -> Self {
+        Self::new(self.x.powf(n.x), self.y.powf(n.y), self.z.powf(n.z))
+    }
+}
+impl<T: FloatingPoint> Vector4<T>  {
+    pub fn pow(&self, n: Self) -> Self {
+        Self::new(self.x.powf(n.x), self.y.powf(n.y), self.z.powf(n.z), self.w.powf(n.w))
     }
 }
 impl<T: Number> Vector for Vector2<T> {
@@ -277,6 +290,12 @@ macro_rules! impl_ops {
             }
             type Output = Self;
         }
+        impl<T: Number> std::ops::Rem for $vector<T>  {
+            fn rem(self, rhs: Self) -> Self::Output {
+                Self { $($element : self.$element % rhs.$element),+ }
+            }
+            type Output = Self;
+        }
         
         impl<T: SignedNumber> std::ops::Neg for $vector<T> {
             fn neg(self) -> Self::Output {
@@ -357,18 +376,8 @@ macro_rules! impl_ops {
                 true $(&& self.$element == *other)+
             }
         }
-        impl<T: Number> std::cmp::PartialEq  for $vector<T>  {
-            fn eq(&self, other: &Self) -> bool {
-                true $(&& self.$element == self.$element)+
-            }
-            fn ne(&self, other: &Self) -> bool {
-                true $(&& self.$element == self.$element)+
-            }
-        }
     };
 }
-
-
 macro_rules! impl_fromvec2 {
     ($typea:ident, $typeb:ident) => {
         impl From<Vector2<$typea>> for Vector2<$typeb> {
@@ -503,3 +512,145 @@ macro_rules! impl_num_traits {
 impl_num_traits!(Vector2, x, y);
 impl_num_traits!(Vector3, x, y, z);
 impl_num_traits!(Vector4, x, y, z, w);
+
+macro_rules! impl_signed {
+    ($structure:ident, $($element:tt),+) => {
+        impl<T: SignedNumber> Signed for $structure<T> {
+            fn abs(&self) -> Self {
+                Self { 
+                    $(
+                        $element: self.$element.abs()
+                    ),+
+                }
+            }
+            fn abs_sub(&self, other: &Self) -> Self {
+                Self { 
+                    $(
+                        $element: self.$element.abs_sub(&other.$element)
+                    ),+
+                }
+            }
+            fn is_negative(&self) -> bool {
+                true $(
+                    && self.$element.is_negative()
+                )+
+            }
+            fn is_positive(&self) -> bool {
+                true $(
+                    && self.$element.is_positive()
+                )+
+            }
+            fn signum(&self) -> Self {
+                Self {
+                    $(
+                        $element: self.$element.signum()
+                    ),+
+                }
+            }
+        }
+    };
+}
+impl<T: Number> Num for Vector2<T> {
+    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        let split_str: Vec<_> = str.split(',').collect();
+        let mut values = Vec::new();
+
+        for i in 0..Self::size() {
+            if i > split_str.len() {
+                let result = T::from_str_radix(split_str[i], radix);
+                match result {
+                    Err(e) => return Err(e),
+                    Ok(o) => { values.push(o) },
+                }
+            }
+        }
+
+        match split_str.len() {
+            0 => Ok(Self::from(T::zero())),
+            1 => Ok(Self::new(values[0],values[0])),
+            _ => Ok(Self::new(values[0],values[1])),
+        }
+    }
+    type FromStrRadixErr = <T as Num>::FromStrRadixErr;
+}
+
+impl<T: Number> Num for Vector3<T> {
+    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        let split_str: Vec<_> = str.split(',').collect();
+        let mut values = Vec::new();
+
+        for i in 0..Self::size() {
+            if i > split_str.len() {
+                let result = T::from_str_radix(split_str[i], radix);
+                match result {
+                    Err(e) => return Err(e),
+                    Ok(o) => { values.push(o) },
+                }
+            }
+        }
+
+        match split_str.len() {
+            0 => Ok(Self::from(T::zero())),
+            1 => Ok(Self::new(values[0],values[0], values[0])),
+            2 => Ok(Self::new(values[0],values[1], values[1])),
+            _ => Ok(Self::new(values[0],values[1], values[2])),
+        }
+    }
+    type FromStrRadixErr = <T as Num>::FromStrRadixErr;
+}
+
+impl<T: Number> Num for Vector4<T> {
+    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        let split_str: Vec<_> = str.split(',').collect();
+        let mut values = Vec::new();
+
+        for i in 0..Self::size() {
+            if i > split_str.len() {
+                let result = T::from_str_radix(split_str[i], radix);
+                match result {
+                    Err(e) => return Err(e),
+                    Ok(o) => { values.push(o) },
+                }
+            }
+        }
+
+        match split_str.len() {
+            0 => Ok(Self::from(T::zero())),
+            1 => Ok(Self::new(values[0],values[0], values[0], values[0])),
+            2 => Ok(Self::new(values[0],values[1], values[1], values[1])),
+            3 => Ok(Self::new(values[0],values[1], values[2], values[2])),
+            _ => Ok(Self::new(values[0],values[1], values[2], values[3])),
+        }
+    }
+    type FromStrRadixErr = <T as Num>::FromStrRadixErr;
+}
+
+impl_signed!(Vector2, x, y);
+impl_signed!(Vector3, x, y, z);
+impl_signed!(Vector4, x, y, z, w);
+macro_rules! impl_clamp {
+    () => {
+        pub fn clamp(self, min: Self, max: Self) -> Self
+        where
+            Self: Sized,
+        {
+            assert!(min <= max);
+            if self < min {
+                min
+            } else if self > max {
+                max
+            } else {
+                self
+            }
+        }
+    };
+}
+impl<T: Number> Vector2<T>  {
+    impl_clamp!();
+}
+impl<T: Number> Vector3<T>  {
+    impl_clamp!();
+}
+impl<T: Number> Vector4<T>  {
+    impl_clamp!();
+}

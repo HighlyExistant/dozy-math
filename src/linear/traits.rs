@@ -20,6 +20,8 @@ pub trait Number:
     + MulAssign
     + DivAssign
     + RemAssign
+    + PartialEq
+    + PartialOrd
     + Bounded
 {
 }
@@ -36,6 +38,8 @@ impl<T> Number for T where
         + MulAssign
         + DivAssign
         + RemAssign
+        + PartialEq
+        + PartialOrd
         + Bounded
 {
 }

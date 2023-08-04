@@ -1,4 +1,6 @@
-use crate::{complex::Complex, FloatingPoint, Number};
+use num_traits::{AsPrimitive, clamp, Signed};
+
+use crate::{complex::Complex, FloatingPoint, Number, Vector, Vector2, EuclideanGeometry, Vector3};
 #[derive(Debug)]
 pub enum QuadraticSolution<T: Number> {
     // used when all variables apart from the final offset variable are 0 this causes the graph to 
@@ -83,4 +85,81 @@ impl QuadraticFormula for f64 {
             return QuadraticSolution::TwoComplex([solution1, solution2]);
         }
     }
+}
+
+pub fn sd_bezier<T: FloatingPoint >(pos: Vector2<T>, v0: Vector2<T>, v1: Vector2<T>, v2: Vector2<T>) -> T
+    where f32: AsPrimitive<T>,
+    f64: AsPrimitive<T>,
+{    
+    let a: Vector2<T> = v1 - v0;
+    let b: Vector2<T> = v0 - v1 * 2.0.as_() + v2;
+    let c: Vector2<T> = a * 2.0.as_();
+    let d: Vector2<T> = v0 - pos;
+
+    let kk = T::one()/b.dot(&b);
+    let kx = kk * a.dot(&b);
+    let ky = kk * (2.0.as_()*a.dot(&a)+d.dot(&b))/3.0.as_();
+    let kz = kk * d.dot(&a);      
+
+    let mut res = T::zero();
+    let mut sgn = T::zero();
+
+    let p: T = ky - kx*kx;
+    let q: T = kx*(2.0.as_()*kx*kx - 3.0.as_()*ky) + kz;
+    let p3: T = p*p*p;
+    let q2: T = q*q;
+    let mut h: T = q2 + 4.0.as_()*p3;
+
+    if( h>=T::zero() ) 
+    {   // 1 root
+        h = h.sqrt();
+        let mut x = (Vector2::new(h,-h)-q)/2.0.as_();
+
+        // #if 0
+        // When p≈0 and p<0, h-q has catastrophic cancelation. So, we do
+        // h=√(q²+4p³)=q·√(1+4p³/q²)=q·√(1+w) instead. Now we approximate
+        // √ by a linear Taylor expansion into h≈q(1+½w) so that the q's
+        // cancel each other in h-q. Expanding and simplifying further we
+        // get x=vec2(p³/q,-p³/q-q). And using a second degree Taylor
+        // expansion instead: x=vec2(k,-k-q) with k=(1-p³/q²)·p³/q
+        if( p.abs()<0.001.as_() )
+        {
+            let k = p3/q;              // linear approx
+          //float k = (1.0-p3/q2)*p3/q;  // quadratic approx 
+            x = Vector2::new(k,-k-q);  
+        }
+        // #endif
+
+        // let uv = x.signum()*pow(abs(x), vec2(1.0/3.0));
+        let uv = x.signum() * x.abs().pow(Vector2::from(T::one()/3.0.as_()));
+        let t = clamp( uv.x+uv.y-kx, T::zero(), T::one() );
+        let q = d+(c+b*t)*t;
+        res = q.dot(&q); // ! Double check this
+        //     	sgn = cro(c+2.0*b*t,q);
+        let dum1: Vector2<T> = c+b*t*2.0.as_();
+    	sgn = dum1.cross(q); // ! Might be cross product idk
+    }
+    else 
+    {   // 3 roots
+        let z = (-p).sqrt();
+        let v = (q/(p*z*2.0.as_())).acos()/3.0.as_();
+        let m = v.cos();
+        let n = v.sin()*1.732050808.as_();
+        let mut t = Vector3::new(m+m,-n-m,n-m)*z-kx;
+        t = t.clamp(Vector3::from(T::zero()), Vector3::from(T::one()) );
+        
+        let  qx=d+(c+b*t.x)*t.x; 
+        let dx= qx.dot(&qx);
+        let dum2: Vector2<T> = c+b*t.x*2.0.as_();
+        let sx: T = dum2.cross(qx);
+        
+        let  qy=d+(c+b*t.y)*t.y; 
+        let dy= qy.dot(&qy);
+        let dum3: Vector2<T> = c+b*t.y*2.0.as_();
+        let sy = dum3.cross(qy);
+
+        if dx<dy { res=dx; sgn=sx; } else {res=dy; sgn=sy; }
+    }
+    
+    return res.sqrt()*sgn.signum();
 }
