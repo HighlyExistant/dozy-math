@@ -4,10 +4,8 @@ mod traits;
 mod matrix;
 mod shapes;
 mod vector;
-mod rotation;
 mod transform;
 mod segments;
-// mod sdf;
 mod bbox;
 mod geometry;
 pub mod smoothing;
@@ -18,9 +16,7 @@ pub use vector::*;
 pub use traits::*;
 pub use bbox::*;
 pub use geometry::*;
-// pub use sdf::*;
 pub use segments::*;
-pub use rotation::*;
 pub use transform::*;
 
 // Vector types

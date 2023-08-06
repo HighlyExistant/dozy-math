@@ -53,6 +53,7 @@ impl<T: Number> Cube<T>  {
 }
 
 // Simplex Code
+#[derive(Clone, Copy)]
 pub struct Simplex<T: Vector + Zero, const N: usize> {
     pub points: [T; N],
     pub size: usize,
@@ -69,8 +70,20 @@ impl<T: Vector + Zero, const N: usize> Simplex<T, N> {
         self.points[0] = point;
         self.size = std::cmp::min(self.size + 1, N);
     }
+    pub fn from_slice(slice: &[T]) -> Self {
+        let mut points: [T; N] = [T::zero(); N];
+        for (i, s) in slice.iter().enumerate() {
+            if i > N { break; }
+            points[i] = *s;
+        }
+        let size = slice.len();
+        Self { points, size }
+    }
     pub fn initialize(&mut self, list: Vec<T>) {
         for (i, v) in list.iter().enumerate() { self.points[i] = *v; }
         self.size = list.len();
+    }
+    pub fn to_vec(&self) -> Vec<T> {
+        (0..self.size).into_iter().map(|i|{ self.points[i] }).collect()
     }
 }

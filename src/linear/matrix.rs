@@ -1,9 +1,14 @@
 use num_traits::Num;
 
-use crate::complex::quaternion::Quaternion;
+use crate::{complex::quaternion::Quaternion, Vector};
 
 use super::{Vector2, Vector3, Vector4, traits::Number};
 
+pub trait SquareMatrix: Sized {
+    fn set_identity(&mut self) { *self = Self::identity(); }
+    fn identity() -> Self;
+    fn transpose(&self) -> Self;
+}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -67,7 +72,31 @@ pub struct Matrix4x2<T> {
 /// Implementation for Matrix2
 /// 
 /// ===========================================================
-
+impl<T: Number> SquareMatrix for Matrix2<T> {
+    fn identity() -> Self {
+        Self { 
+            x: Vector2 { 
+                x: T::one(), 
+                y: T::zero() }, 
+            y: Vector2 { 
+                x: T::zero(), 
+                y: T::one() 
+            } 
+        }
+    }
+    fn transpose(&self) -> Self {
+        Self { 
+            x: Vector2 { 
+                x: self.y.y, 
+                y: self.y.x 
+            }, 
+            y: Vector2 { 
+                x: self.x.y, 
+                y: self.x.x
+            } 
+        }
+    }
+}
 ///
 /// These functions are available for all matrices.
 /// 
@@ -84,11 +113,6 @@ impl<T> Matrix2<T>  {
 /// These functions are available for all numbers including
 /// floating point.
 /// 
-impl<T: Number> Matrix2<T>  {
-    pub fn identity(val: T) -> Self {
-        Self { x: Vector2 { x: val, y: T::zero() }, y: Vector2 { x: T::zero(), y: val } }
-    }
-}
 
 // traits for bitwise operations
 impl<T: Number> std::ops::Add for Matrix2<T>  {
@@ -271,9 +295,6 @@ impl<T> Matrix3<T>  {
 /// floating point.
 /// 
 impl<T: Number> Matrix3<T>  {
-    pub fn identity(val: T) -> Self {
-        Self { x: Vector3 { x: val, y: T::zero(), z: T::zero() }, y: Vector3 { x: T::zero(), y: val, z: T::zero() }, z: Vector3 { x: T::zero(), y: T::zero(), z: val } }
-    }
     pub fn from_scale(v: Vector3<T>) -> Self {
         Matrix3::new(
             v.x, T::zero(), T::zero(), 
@@ -339,6 +360,46 @@ impl<T: Number> From<T> for Matrix3<T> {
     /// 
     fn from(value: T) -> Self {
         Self { x: Vector3::from(value), y: Vector3::from(value), z: Vector3::from(value) }
+    }
+}
+impl<T: Number> SquareMatrix for Matrix3<T> {
+    fn identity() -> Self {
+        Self { 
+            x: Vector3 { 
+                x: T::one(), 
+                y: T::zero(), 
+                z: T::zero() 
+            }, 
+            y: Vector3 { 
+                x: T::zero(), 
+                y: T::one(), 
+                z: T::zero() 
+            }, 
+            z: Vector3 { 
+                x: T::zero(), 
+                y: T::zero(), 
+                z: T::one() 
+            } 
+        }
+    }
+    fn transpose(&self) -> Self {
+        Self { 
+            x: Vector3 { 
+                x: self.x.x, 
+                y: self.y.x, 
+                z: self.z.x
+            }, 
+            y: Vector3 { 
+                x: self.x.y,
+                y: self.y.y,
+                z: self.z.y
+            }, 
+            z: Vector3 { 
+                x: self.x.z, 
+                y: self.y.z, 
+                z: self.z.z
+            } 
+        }
     }
 }
 
@@ -464,14 +525,6 @@ impl<T> Matrix4<T>  {
 /// floating point.
 /// 
 impl<T: Number> Matrix4<T>  {
-    pub fn identity(val: T) -> Self {
-        Self { 
-            x: Vector4 { x: val, y: T::zero(), z: T::zero(), w: T::zero() }, 
-            y: Vector4 { x: T::zero(), y: val, z: T::zero(), w: T::zero() }, 
-            z: Vector4 { x: T::zero(), y: T::zero(), z: val, w: T::zero() }, 
-            w: Vector4 { x: T::zero(), y: T::zero(), z: T::zero(), w: val } 
-        }
-    }
     pub fn from_translation(v: Vector3<T>) -> Self {
         Matrix4::new(
             T::one(), T::zero(), T::zero(), T::zero(),
@@ -538,6 +591,66 @@ impl<T: Number> From<Quaternion<T>> for Matrix4<T> {
                 y: T::zero(), 
                 z: T::zero(), 
                 w: T::one() 
+            } 
+        }
+    }
+}
+
+impl<T: Number> SquareMatrix for Matrix4<T> {
+    fn identity() -> Self {
+        Self { 
+            x: Vector4 { 
+                x: T::one(),  
+                y: T::zero(), 
+                z: T::zero(), 
+                w: T::zero() 
+            }, 
+            y: Vector4 { 
+                x: T::zero(), 
+                y: T::one(), 
+                z: T::zero(), 
+                w: T::zero() 
+            }, 
+            z: Vector4 { 
+                x: T::zero(), 
+                y: T::zero(), 
+                z: T::one(), 
+                w: T::zero() 
+            }, 
+            w: Vector4 { 
+                x: T::zero(), 
+                y: T::zero(), 
+                z: T::zero(), 
+                w: T::one() 
+            } 
+        }
+    }
+    fn transpose(&self) -> Self {
+        
+        Self { 
+            x: Vector4 { 
+                x: self.x.x, 
+                y: self.y.x, 
+                z: self.z.x, 
+                w: self.w.x,
+            }, 
+            y: Vector4 { 
+                x: self.x.y, 
+                y: self.y.y, 
+                z: self.z.y, 
+                w: self.w.y, 
+            }, 
+            z: Vector4 { 
+                x: self.x.z, 
+                y: self.y.z, 
+                z: self.z.z, 
+                w: self.w.z, 
+            }, 
+            w: Vector4 { 
+                x: self.x.w, 
+                y: self.y.w, 
+                z: self.z.w, 
+                w: self.w.w, 
             } 
         }
     }

@@ -1,6 +1,7 @@
-use num_traits::{Zero, One};
+use num_traits::One;
 
-use super::{Number, shapes::{Rectangle, Cube}, LinearSegment, Vector2};
+use crate::linear::{LinearSegment, Vector2, Rectangle, Number, Cube};
+
 pub trait BoundingBox2D<T: Number> {
     fn bbox(&self) -> Rectangle<T>;
 }

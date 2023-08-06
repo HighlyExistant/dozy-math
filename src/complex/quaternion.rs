@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use num_traits::AsPrimitive;
 
-use crate::{Vector3, Matrix3, Number, FloatingPoint};
+use crate::{Vector3, Matrix3, Number, FloatingPoint, Vector};
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -46,6 +46,15 @@ impl<T> Quaternion<T>  {
         let half_angle = angle * 0.5.as_();
         let s = half_angle.sin();
         Self { vector: vector * s, scalar: half_angle.cos() }
+    }
+    pub fn to_euler(&self) -> Vector3<T>
+        where T: FloatingPoint,
+        f32: AsPrimitive<T>, 
+        f64: AsPrimitive<T> {
+        let roll: T = T::atan2(2.0.as_() * (self.scalar * self.vector.x + self.vector.y * self.vector.z), self.scalar*self.scalar - self.vector.x*self.vector.x - self.vector.y*self.vector.y + self.vector.z*self.vector.z);
+        let pitch: T = T::asin((-2.0).as_() * (self.scalar * self.vector.y - self.vector.z * self.vector.x));
+        let yaw = T::atan2(2.0.as_() * (self.scalar * self.vector.z + self.vector.x * self.vector.y), self.scalar*self.scalar + self.vector.x*self.vector.x - self.vector.y*self.vector.y - self.vector.z*self.vector.z);
+        Vector3 { x: roll, y: pitch, z: yaw }
     }
 }
 

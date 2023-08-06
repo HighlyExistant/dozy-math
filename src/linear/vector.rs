@@ -9,7 +9,7 @@ pub trait Vector:
     PartialEq + 
     std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Mul<Output = Self> + std::ops::Div<Output = Self> +
     std::ops::Add<Self::Scalar, Output = Self> + std::ops::Sub<Self::Scalar, Output = Self> + std::ops::Mul<Self::Scalar, Output = Self> + std::ops::Div<Self::Scalar, Output = Self> {
-    type Scalar;
+    type Scalar: Number;
     fn size() -> usize;
     fn dot(&self, other: &Self) -> Self::Scalar;
     fn magnitude(&self) -> Self::Scalar
@@ -186,6 +186,11 @@ impl<T: Number> Vector for Vector3<T> {
         self.dot(self).sqrt()
     }
     
+}
+impl<T: Number> From<Vector2<T>> for Vector3<T> {
+    fn from(value: Vector2<T>) -> Self {
+        Self { x: value.x, y: value.y, z: T::one() }
+    }
 }
 impl<T: Number> Vector for Vector4<T> {
     type Scalar = T;
