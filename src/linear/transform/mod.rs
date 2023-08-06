@@ -4,42 +4,42 @@ use crate::complex::quaternion::Quaternion;
 use crate::linear::vector::Vector;
 
 use crate::linear::*;
-mod rotationold;
+mod dimension;
 mod rotater;
 mod translation;
 pub use translation::*;
 pub use rotater::*;
 use num_traits::{One, Zero};
+
+use self::dimension::{Dimension, FlatDimension, SolidDimension};
+
 pub trait Transform: Default + Clone + Copy {
-    type Rotation;
-    // Translation also serves as our spatial vector
-    type Translation: One + Zero + Vector;
-    type Scaling: One + Zero;
-    fn apply_matrix4(&self, mat: &mut FMat4) {
-        *mat = FMat4::identity();
-    }
-    fn apply_matrix3(&self, mat: &mut FMat3) {
-        *mat = FMat3::identity();
-    }
-    fn apply_matrix2(&self, mat: &mut FMat2) {
-        *mat = FMat2::identity();
-    }
-    fn translation(&self) -> Self::Translation;
-    fn rotation(&self) -> Self::Rotation;
-    fn scaling(&self) -> Self::Scaling;
+    type Dimension: Dimension;
+    fn translation(&self) -> <Self::Dimension as Dimension>::VectorRepresentation;
+    fn rotation(&self) -> <Self::Dimension as Dimension>::RotationRepresentation;
+    fn scaling(&self) -> <Self::Dimension as Dimension>::VectorRepresentation;
     
-    fn rotate(&self, rot: &Self::Rotation) -> Self;
-    fn translate(&self, pos: &Self::Translation) -> Self;
-    fn scale(&self, scale: &Self::Scaling) -> Self;
+    fn rotate(&self, rot: &<Self::Dimension as Dimension>::RotationRepresentation) -> Self;
+    fn translate(&self, pos: &<Self::Dimension as Dimension>::VectorRepresentation) -> Self;
+    fn scale(&self, scale: &<Self::Dimension as Dimension>::VectorRepresentation) -> Self;
 
-    fn set_rotation(&self, rot: &Self::Rotation) -> Self;
-    fn set_translation(&self, pos: &Self::Translation) -> Self;
-    fn set_scaling(&self, scale: &Self::Scaling) -> Self;
+    fn set_rotation(&self, rot: &<Self::Dimension as Dimension>::RotationRepresentation) -> Self;
+    fn set_translation(&self, pos: &<Self::Dimension as Dimension>::VectorRepresentation) -> Self;
+    fn set_scaling(&self, scale: &<Self::Dimension as Dimension>::VectorRepresentation) -> Self;
 
-    fn get_rotation_mut(&mut self) -> &mut Self::Rotation;
-    fn get_translation_mut(&mut self) -> &mut Self::Translation;
-    fn get_scaling_mut(&mut self) -> &mut Self::Scaling;
     fn normal_matrix(&self) -> FMat3;
+}
+
+pub trait TransformMatrix<T: Number>: Transform {
+    fn apply_matrix4(&self, mat: &mut Matrix4<T>) {
+        *mat = Matrix4::<T>::identity();
+    }
+    fn apply_matrix3(&self, mat: &mut Matrix3<T>) {
+        *mat = Matrix3::<T>::identity();
+    }
+    fn apply_matrix2(&self, mat: &mut Matrix2<T>) {
+        *mat = Matrix2::<T>::identity();
+    }
 }
 
 
@@ -49,10 +49,7 @@ pub struct Transform2D {
     pub scale: FVec2,
     pub rotation: f32,
 }
-impl Transform for Transform2D {
-    type Rotation = f32;
-    type Scaling = FVec2;
-    type Translation = FVec2;
+impl TransformMatrix<f32> for Transform2D {
     fn apply_matrix2(&self, mat: &mut FMat2) {
         let sin_rot = self.rotation.sin();
         let cos_rot = self.rotation.cos();
@@ -72,50 +69,45 @@ impl Transform for Transform2D {
         mat.z.x = self.translation.x;
         mat.z.y = self.translation.y;
     }
-    fn rotate(&self, rot: &Self::Rotation) -> Self {
+}
+impl Transform for Transform2D {
+    type Dimension = FlatDimension<f32>;
+    
+    fn rotate(&self, rot: &f32) -> Self {
         let mut rotation = *self;
         rotation.rotation += *rot;
         rotation
     }
-    fn translate(&self, pos: &Self::Translation) -> Self {
+    fn translate(&self, pos: &FVec2) -> Self {
         let mut translation = *self;
         translation.translation += *pos;
         translation
     }
-    fn scale(&self, scale: &Self::Scaling) -> Self {
+    fn scale(&self, scale: &FVec2) -> Self {
         let mut scaling = *self;
         scaling.scale += *scale;
         scaling
     }
-    fn rotation(&self) -> Self::Rotation { self.rotation }
-    fn scaling(&self) -> Self::Scaling { self.scale }
-    fn translation(&self) -> Self::Translation { self.translation }
-    fn set_rotation(&self, rot: &Self::Rotation) -> Self {
+    fn rotation(&self) -> f32 { self.rotation }
+    fn scaling(&self) -> FVec2 { self.scale }
+    fn translation(&self) -> FVec2 { self.translation }
+    fn set_rotation(&self, rot: &f32) -> Self {
         let mut rotation = *self;
         rotation.rotation = *rot;
         rotation
     }
-    fn set_scaling(&self, scale: &Self::Scaling) -> Self {
+    fn set_scaling(&self, scale: &FVec2) -> Self {
         let mut scaling = *self;
         scaling.scale = *scale;
         scaling
     }
-    fn set_translation(&self, pos: &Self::Translation) -> Self {
+    fn set_translation(&self, pos: &FVec2) -> Self {
         let mut translation = *self;
         translation.translation = *pos;
         translation
     }
-    fn get_rotation_mut(&mut self) -> &mut Self::Rotation {
-        &mut self.rotation
-    }
-    fn get_translation_mut(&mut self) -> &mut Self::Translation {
-        &mut self.translation
-    }
-    fn get_scaling_mut(&mut self) -> &mut Self::Scaling {
-        &mut self.scale
-    }
     fn normal_matrix(&self) -> FMat3 {
-        let x = self.set_scaling(&(Self::Scaling::from(1.0) / self.scaling()));
+        let x = self.set_scaling(&(FVec2::from(1.0) / self.scaling()));
         let mut mat = FMat3::identity();
         x.apply_matrix3(&mut mat);
         mat
@@ -132,11 +124,7 @@ pub struct TransformQuaternion3D {
     pub scale: FVec3,
     pub rotation: Quaternion<f32>,
 }
-
-impl Transform for TransformQuaternion3D {
-    type Rotation = Quaternion<f32>;
-    type Scaling = FVec3;
-    type Translation = FVec3;
+impl TransformMatrix<f32> for TransformQuaternion3D {
     fn apply_matrix4(&self, mat: &mut FMat4) {
         *mat = FMat4::identity();
         *mat = translate(mat, self.translation);
@@ -160,50 +148,51 @@ impl Transform for TransformQuaternion3D {
 
         *mat = *mat * scale;
     }
+}
+impl Transform for TransformQuaternion3D {
+    type Dimension = SolidDimension<f32>;
+    
     fn normal_matrix(&self) -> FMat3 {
-        let x = self.set_scaling(&(Self::Scaling::from(1.0) / self.scaling()));
+        let x = self.set_scaling(&(FVec3::from(1.0) / self.scaling()));
         let mut mat = FMat3::identity();
         x.apply_matrix3(&mut mat);
         mat
     }
-    fn get_rotation_mut(&mut self) -> &mut Self::Rotation { &mut self.rotation }
-    fn get_translation_mut(&mut self) -> &mut Self::Translation { &mut self.translation }
-    fn get_scaling_mut(&mut self) -> &mut Self::Scaling { &mut self.scale }
-    fn rotate(&self, rot: &Self::Rotation) -> Self {
+    fn rotate(&self, rot: &FVec3) -> Self {
         let mut this = *self;
-        this.rotation = this.rotation * *rot;
+        this.rotation = this.rotation * Quaternion::from_euler(*rot);
         this
     }
-    fn translate(&self, pos: &Self::Translation) -> Self {
+    fn translate(&self, pos: &FVec3) -> Self {
         let mut this = *self;
         this.translation += *pos;
         this
     }
-    fn scale(&self, scale: &Self::Scaling) -> Self {
+    fn scale(&self, scale: &FVec3) -> Self {
         let mut this = *self;
         this.scale += *scale;
         this
     }
-    fn rotation(&self) -> Self::Rotation {
-        self.rotation
+    fn rotation(&self) -> FVec3 {
+        self.rotation.to_euler()
     }
-    fn scaling(&self) -> Self::Scaling {
+    fn scaling(&self) -> FVec3 {
         self.scale
     }
-    fn translation(&self) -> Self::Translation {
+    fn translation(&self) -> FVec3 {
         self.translation
     }
-    fn set_rotation(&self, rot: &Self::Rotation) -> Self {
+    fn set_rotation(&self, rot: &FVec3) -> Self {
         let mut rotation = *self;
-        rotation.rotation = *rot;
+        rotation.rotation = Quaternion::from_euler(*rot);
         rotation
     }
-    fn set_scaling(&self, scale: &Self::Scaling) -> Self {
+    fn set_scaling(&self, scale: &FVec3) -> Self {
         let mut scaling = *self;
         scaling.scale = *scale;
         scaling
     }
-    fn set_translation(&self, pos: &Self::Translation) -> Self {
+    fn set_translation(&self, pos: &FVec3) -> Self {
         let mut translation = *self;
         translation.translation = *pos;
         translation
