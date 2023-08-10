@@ -8,6 +8,7 @@ mod transform;
 mod segments;
 mod bbox;
 mod geometry;
+mod dimension;
 pub mod smoothing;
 use num_traits::AsPrimitive;
 pub use shapes::*;
@@ -18,6 +19,7 @@ pub use bbox::*;
 pub use geometry::*;
 pub use segments::*;
 pub use transform::*;
+pub use dimension::*;
 
 // Vector types
 pub type FVec2 = Vector2<f32>;

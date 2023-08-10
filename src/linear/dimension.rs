@@ -3,8 +3,8 @@ use std::marker::PhantomData;
 use crate::{Vector, Vector3, Number, Vector2};
 
 pub trait Dimension {
-    type RotationRepresentation;
-    type VectorRepresentation: Vector;
+    type RotationRepresentation: Sized;
+    type VectorRepresentation: Vector + Sized;
 }
 
 pub struct SolidDimension<T: Number> {

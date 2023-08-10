@@ -28,15 +28,16 @@ impl<T> Quaternion<T>  {
     /// 
     /// converts euler angles into quaternion form.
     /// 
-    /// this function is heavily inspired by [this stackexcgange post](https://math.stackexchange.com/questions/2975109/how-to-convert-euler-angles-to-quaternions-and-get-the-same-euler-angles-back-fr)
+    /// this function is heavily inspired by [this stackexchange post](https://math.stackexchange.com/questions/2975109/how-to-convert-euler-angles-to-quaternions-and-get-the-same-euler-angles-back-fr)
     pub fn from_euler(v: Vector3<T>) -> Self 
         where T: FloatingPoint,
         f32: AsPrimitive<T>, 
         f64: AsPrimitive<T> {
-        let x = T::sin(v.x/2.0.as_()) * T::cos(v.z/2.0.as_()) * T::cos(v.y/2.0.as_()) - T::cos(v.x/2.0.as_()) * T::sin(v.z/2.0.as_()) * T::sin(v.y/2.0.as_());
-        let y = T::cos(v.x/2.0.as_()) * T::cos(v.z/2.0.as_()) * T::sin(v.y/2.0.as_()) - T::sin(v.x/2.0.as_()) * T::sin(v.z/2.0.as_()) * T::cos(v.y/2.0.as_());
-        let z = T::cos(v.x/2.0.as_()) * T::sin(v.z/2.0.as_()) * T::cos(v.y/2.0.as_()) + T::sin(v.x/2.0.as_()) * T::cos(v.z/2.0.as_()) * T::sin(v.y/2.0.as_());
-        let w = T::cos(v.x/2.0.as_()) * T::cos(v.z/2.0.as_()) * T::cos(v.y/2.0.as_()) + T::sin(v.x/2.0.as_()) * T::sin(v.z/2.0.as_()) * T::sin(v.y/2.0.as_());
+        let (yaw, pitch, roll) = (v.x, v.y, v.z);
+        let x = T::sin(roll/2.0.as_()) * T::cos(pitch/2.0.as_()) * T::cos(yaw/2.0.as_()) - T::cos(roll/2.0.as_()) * T::sin(pitch/2.0.as_()) * T::sin(yaw/2.0.as_());
+        let y = T::cos(roll/2.0.as_()) * T::sin(pitch/2.0.as_()) * T::cos(yaw/2.0.as_()) + T::sin(roll/2.0.as_()) * T::cos(pitch/2.0.as_()) * T::sin(yaw/2.0.as_());
+        let z = T::cos(roll/2.0.as_()) * T::cos(pitch/2.0.as_()) * T::sin(yaw/2.0.as_()) - T::sin(roll/2.0.as_()) * T::sin(pitch/2.0.as_()) * T::cos(yaw/2.0.as_());
+        let w = T::cos(roll/2.0.as_()) * T::cos(pitch/2.0.as_()) * T::cos(yaw/2.0.as_()) + T::sin(roll/2.0.as_()) * T::sin(pitch/2.0.as_()) * T::sin(yaw/2.0.as_());
         Self { vector: Vector3 { x, y, z }, scalar: w }
     }
     pub fn angle_axis(angle: T, vector: Vector3<T>) -> Self 
@@ -51,10 +52,39 @@ impl<T> Quaternion<T>  {
         where T: FloatingPoint,
         f32: AsPrimitive<T>, 
         f64: AsPrimitive<T> {
-        let roll: T = T::atan2(2.0.as_() * (self.scalar * self.vector.x + self.vector.y * self.vector.z), self.scalar*self.scalar - self.vector.x*self.vector.x - self.vector.y*self.vector.y + self.vector.z*self.vector.z);
-        let pitch: T = T::asin((-2.0).as_() * (self.scalar * self.vector.y - self.vector.z * self.vector.x));
-        let yaw = T::atan2(2.0.as_() * (self.scalar * self.vector.z + self.vector.x * self.vector.y), self.scalar*self.scalar + self.vector.x*self.vector.x - self.vector.y*self.vector.y - self.vector.z*self.vector.z);
-        Vector3 { x: roll, y: pitch, z: yaw }
+        // let roll: T = T::atan2(2.0.as_() * (self.scalar * self.vector.x + self.vector.y * self.vector.z), self.scalar*self.scalar - self.vector.x*self.vector.x - self.vector.y*self.vector.y + self.vector.z*self.vector.z);
+        // let pitch: T = T::asin((-2.0).as_() * (self.scalar * self.vector.y - self.vector.z * self.vector.x));
+        // let yaw = T::atan2(2.0.as_() * (self.scalar * self.vector.z + self.vector.x * self.vector.y), self.scalar*self.scalar + self.vector.x*self.vector.x - self.vector.y*self.vector.y - self.vector.z*self.vector.z);
+        // Vector3 { x: roll, y: pitch, z: yaw }
+
+        let (x, y, z, w) = (self.vector.x, self.vector.y, self.vector.z, self.scalar);
+        let t0 = 2.0.as_() * (w * x + y * z);
+        let t1 = 1.0.as_() - 2.0.as_() * (x * x + y * y);
+        let roll = T::atan2(t0, t1);
+        let t2 = 2.0.as_() * (w * y - z * x);
+        let t2 = if t2 > 1.0.as_() {1.0.as_()} else {t2};
+        let t2 = if t2 < (-1.0).as_() {(-1.0).as_()} else {t2};
+        let pitch = T::asin(t2);
+        let t3 = 2.0.as_() * (w * z + x * y);
+        let t4 = 1.0.as_() - 2.0.as_() * (y * y + z * z);
+        let yaw = T::atan2(t3, t4);
+        return Vector3::new(yaw, pitch, roll);
+
+        // let sinr_cosp = 2.0.as_() * (self.scalar * self.vector.x + self.vector.y * self.vector.z);
+        // let cosr_cosp = 1.0.as_() - 2.0.as_() * (self.vector.x * self.vector.x + self.vector.y * self.vector.y);
+        // let roll = T::atan2(sinr_cosp, cosr_cosp);
+// 
+        // // pitch (y-axis rotation)
+        // let sinp = T::sqrt(1.0.as_() + 2.0.as_() * (self.scalar * self.vector.y - self.vector.x * self.vector.z));
+        // let cosp = T::sqrt(1.0.as_() - 2.0.as_() * (self.scalar * self.vector.y - self.vector.x * self.vector.z));
+        // let pitch = 2.0.as_() * T::atan2(sinp, cosp) - std::f64::consts::PI.as_() / 2.0.as_();
+// 
+        // // yaw (z-axis rotation)
+        // let siny_cosp = 2.0.as_() * (self.scalar * self.vector.z + self.vector.x * self.vector.y);
+        // let cosy_cosp = 1.0.as_() - 2.0.as_() * (self.vector.y * self.vector.y + self.vector.z * self.vector.z);
+        // let yaw = T::atan2(siny_cosp, cosy_cosp);
+// 
+        // return Vector3::new(roll, pitch, yaw);
     }
 }
 
